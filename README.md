@@ -66,3 +66,17 @@ Para activar el acceso:
 4. En Authentication, configura la confirmación de correo y las URLs autorizadas para tu dominio.
 
 Hasta completar esos pasos, la aplicación seguirá en modo demostración. La interfaz actual de descubrimiento y chat todavía utiliza datos de ejemplo; no se deben presentar como usuarios o conversaciones reales.
+
+
+## Preferencias de perfil en Supabase
+
+La aplicación ya incluye el guardado de gustos e intenciones en la tabla `profile_preferences`. Para activarlo:
+
+1. Abre tu proyecto Supabase y entra en **SQL Editor**.
+2. Si todavía no lo hiciste, ejecuta `supabase/schema.sql`.
+3. Abre `supabase/profile_preferences.sql` en este repositorio, copia su contenido completo y ejecútalo.
+4. Comprueba que las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` del despliegue corresponden a ese proyecto.
+
+Los usuarios pueden elegir si muestran sus intereses y sus intenciones. RLS permite que cada persona modifique solo sus propios datos. La función `get_discoverable_profile_preferences()` devuelve únicamente gustos e intenciones autorizados de perfiles marcados como visibles; no devuelve correo, fecha de nacimiento ni preferencias privadas de búsqueda.
+
+**Estado:** el guardado y la consulta segura están preparados. La pantalla Descubrir todavía utiliza perfiles ficticios; conectar el listado de perfiles reales es una etapa posterior.
