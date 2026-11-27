@@ -8,6 +8,7 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { AccountSettings } from './AccountSettings'
 
 type Tab = 'discover' | 'map' | 'likes' | 'chats' | 'profile'
+type PublicPreferenceProfile = { user_id: string; display_name: string; interests: string[]; intentions: string[]; dating_style: string | null }
 type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; lookingFor: string[]; photo: string }
 
 const people: Person[] = [
@@ -56,10 +57,34 @@ export function DemoApp() {
   const [gamesPlayed, setGamesPlayed] = useState(0)
   const [connectionToolsOpen, setConnectionToolsOpen] = useState(false)
   const [chatStatuses, setChatStatuses] = useState<Record<number,string>>({})
+  const [publicPreferenceProfiles, setPublicPreferenceProfiles] = useState<PublicPreferenceProfile[]>([])
+  const [loadingPublicProfiles, setLoadingPublicProfiles] = useState(false)
 
   useEffect(() => {
     let alive = true
-    if (supabase) supabase.auth.getUser().then(({ data }) => { if (alive) setAccountEmail(data.user?.email || '') })
+    const loadAccount = async () => {
+      const { data } = await supabase.auth.getUser()
+      if (alive) setAccountEmail(data.user?.email || '')
+    }
+    loadAccount()
+    return () => { alive = false }
+  }, [])
+
+  useEffect(() => {
+    let alive = true
+    const loadPublicPreferences = async () => {
+      setLoadingPublicProfiles(true)
+      const { data, error } = await supabase.rpc('get_discoverable_profile_preferences')
+      if (!alive) return
+      if (error) {
+        console.warn('No se pudieron cargar perfiles públicos', error.message)
+        setPublicPreferenceProfiles([])
+      } else {
+        setPublicPreferenceProfiles((data || []) as PublicPreferenceProfile[])
+      }
+      setLoadingPublicProfiles(false)
+    }
+    loadPublicPreferences()
     return () => { alive = false }
   }, [])
 
@@ -195,6 +220,7 @@ export function DemoApp() {
               </div>
               <aside className="discover-aside"><div className="aside-title"><Sparkles size={17}/> Una conexión empieza aquí</div><h3>No se trata de deslizar sin parar.</h3><p>Queremos que descubras personas con intereses y formas de ver la vida que conecten contigo.</p><div className="aside-stat"><div><strong>{liked.length}</strong><span>Likes enviados</span></div><div><strong>{remaining.length}</strong><span>Perfiles por ver</span></div></div><div className="privacy-note"><LockKeyhole size={17}/><span>Tu ubicación exacta nunca se muestra a otros perfiles.</span></div></aside>
             </div>
+            <div className="public-preferences-section"><div className="eyebrow">PERSONAS REALES · PREFERENCIAS COMPARTIDAS</div><h2>Qué buscan otras personas</h2><p>Solo mostramos perfiles que han decidido ser visibles y compartir sus gustos o intenciones.</p>{loadingPublicProfiles?<div className="public-profile-empty">Cargando perfiles…</div>:publicPreferenceProfiles.length===0?<div className="public-profile-empty">Todavía no hay perfiles visibles con preferencias compartidas. Cuando otras personas completen su perfil y activen su visibilidad, aparecerán aquí.</div>:<div className="public-preferences-grid">{publicPreferenceProfiles.map(profile=><article className="public-preference-card" key={profile.user_id}><strong>{profile.display_name}</strong>{profile.intentions.length>0&&<div><small>QUÉ BUSCA</small><div className="public-tag-list">{profile.intentions.map(item=><span key={item}>{item}</span>)}</div></div>}{profile.interests.length>0&&<div><small>LE GUSTA</small><div className="public-tag-list">{profile.interests.map(item=><span key={item}>{item}</span>)}</div></div>}{profile.dating_style&&<p>{profile.dating_style}</p>}</article>)}</div>}</div>
           </section>}
 
           {tab === 'map' && <section><div className="section-heading"><div><div className="eyebrow">CERCA DE TI</div><h1>La ciudad también <em>conecta.</em></h1><p>Explora planes y encuentros compartidos.</p></div><button className="primary-btn" onClick={() => flash('La creación de quedadas llegará en una próxima etapa')}><Plus size={17}/> Crear quedada</button></div><div className="map-placeholder"><div className="map-grid"></div><div className="map-center"><MapPin size={28}/><strong>Málaga</strong><span>Vista de mapa de demostración</span></div><div className="map-pin pin-one"><MapPin/></div><div className="map-pin pin-two"><MapPin/></div><div className="map-pin pin-three"><MapPin/></div><div className="map-disclaimer">Ubicaciones ilustrativas · No representa personas reales</div></div><div className="event-row"><div className="event-icon"><Sparkles/></div><div><strong>Planes por descubrir</strong><p>Próximamente podrás encontrar quedadas públicas y proponer tus propios planes.</p></div></div></section>}
