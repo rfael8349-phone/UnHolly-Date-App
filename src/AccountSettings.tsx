@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { X, ChevronLeft, ChevronRight, LogOut, UserRound, SlidersHorizontal, Shield, Bell, Palette, HelpCircle, Save, Sparkles } from 'lucide-react'
+import { X, ChevronLeft, ChevronRight, LogOut, UserRound, SlidersHorizontal, Shield, Bell, Palette, HelpCircle, Save, Sparkles, Heart } from 'lucide-react'
 import { supabase } from './lib/supabase'
 
 type Props = { onClose: () => void; profileName: string; setProfileName: (v:string)=>void; flash: (v:string)=>void }
