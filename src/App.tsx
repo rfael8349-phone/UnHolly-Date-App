@@ -1,0 +1,120 @@
+import { useMemo, useState } from 'react'
+import {
+  Heart, Compass, MapPin, MessageCircle, UserRound, ShieldCheck,
+  Sparkles, SlidersHorizontal, Bell, Plus, Send, ChevronRight,
+  Check, Crown, X, Menu, MoreHorizontal, LockKeyhole
+} from 'lucide-react'
+import { isSupabaseConfigured } from './lib/supabase'
+
+type Tab = 'discover' | 'map' | 'likes' | 'chats' | 'profile'
+type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; photo: string }
+
+const people: Person[] = [
+  { id: 1, name: 'Lucía', age: 28, city: 'Málaga', distance: '2 km', bio: 'Me gustan los conciertos pequeños, los paseos junto al mar y descubrir cafeterías nuevas.', tags: ['Música', 'Playa', 'Café'], photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop' },
+  { id: 2, name: 'Clara', age: 31, city: 'Málaga', distance: '4 km', bio: 'Un buen plan empieza con una conversación y termina con una historia que contar.', tags: ['Viajes', 'Cine', 'Arte'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop' },
+  { id: 3, name: 'Nerea', age: 26, city: 'Torremolinos', distance: '7 km', bio: 'Naturaleza, animales y música en directo. Busco conocer gente sin prisas.', tags: ['Naturaleza', 'Música', 'Animales'], photo: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&auto=format&fit=crop' },
+]
+
+const initialChats = [
+  { id: 1, name: 'Lucía', preview: '¡Me encanta ese grupo!', time: '12:42', photo: people[0].photo, messages: ['¡Hola! ¿Qué música escuchas últimamente?', 'Mucho indie y rock. ¿Y tú?', '¡Me encanta ese grupo!'] },
+  { id: 2, name: 'Clara', preview: '¿Te apetece un café?', time: 'Ayer', photo: people[1].photo, messages: ['Hola 😊', '¿Te apetece un café esta semana?'] },
+]
+
+function App() {
+  const [tab, setTab] = useState<Tab>('discover')
+  const [index, setIndex] = useState(0)
+  const [liked, setLiked] = useState<number[]>([])
+  const [passed, setPassed] = useState<number[]>([])
+  const [chats, setChats] = useState(initialChats)
+  const [activeChat, setActiveChat] = useState<number | null>(null)
+  const [message, setMessage] = useState('')
+  const [notice, setNotice] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [profileName, setProfileName] = useState('Tu perfil')
+  const [mobileMenu, setMobileMenu] = useState(false)
+
+  const current = people[index % people.length]
+  const active = chats.find(c => c.id === activeChat)
+  const remaining = useMemo(() => people.filter(p => !liked.includes(p.id) && !passed.includes(p.id)), [liked, passed])
+
+  function flash(text: string) { setNotice(text); window.setTimeout(() => setNotice(''), 2600) }
+  function likePerson() {
+    if (!current) return
+    setLiked(old => old.includes(current.id) ? old : [...old, current.id])
+    flash('Like guardado en esta demostración')
+    setIndex(i => i + 1)
+  }
+  function passPerson() { setPassed(old => [...old, current.id]); setIndex(i => i + 1) }
+  function sendMessage() {
+    if (!message.trim() || !activeChat) return
+    setChats(old => old.map(c => c.id === activeChat ? { ...c, preview: message, time: 'Ahora', messages: [...c.messages, message] } : c))
+    setMessage('')
+  }
+
+  const nav = [
+    { id: 'discover' as Tab, label: 'Descubrir', icon: Compass },
+    { id: 'map' as Tab, label: 'Mapa', icon: MapPin },
+    { id: 'likes' as Tab, label: 'Likes', icon: Heart },
+    { id: 'chats' as Tab, label: 'Chats', icon: MessageCircle },
+    { id: 'profile' as Tab, label: 'Perfil', icon: UserRound },
+  ]
+
+  return (
+    <div className="app-shell">
+      <aside className={`sidebar ${mobileMenu ? 'sidebar-open' : ''}`}>
+        <a className="brand" href="#" onClick={e => { e.preventDefault(); setTab('discover') }}>
+          <span className="brand-mark"><Heart size={20} fill="currentColor" /></span>
+          <span>unholly<span className="brand-dot">.</span></span>
+        </a>
+        <div className="side-caption">TU ESPACIO</div>
+        <nav className="side-nav">
+          {nav.map(item => <button key={item.id} className={`nav-item ${tab === item.id ? 'active' : ''}`} onClick={() => { setTab(item.id); setActiveChat(null); setMobileMenu(false) }}><item.icon size={19} /><span>{item.label}</span>{item.id === 'likes' && liked.length > 0 && <b className="nav-count">{liked.length}</b>}</button>)}
+        </nav>
+        <div className="sidebar-bottom">
+          <div className="plus-card"><div className="plus-icon"><Crown size={18}/></div><strong>UnHolly Plus</strong><p>Descubre más posibilidades.</p><button onClick={() => flash('Los planes Premium se activarán más adelante')}>Conocer Plus <ChevronRight size={14}/></button></div>
+          <button className="safety-link" onClick={() => flash('Centro de seguridad: versión inicial')}><ShieldCheck size={18}/> Centro de seguridad</button>
+          <div className="mini-user"><div className="avatar-placeholder">T</div><div><strong>{profileName}</strong><small>Cuenta de demostración</small></div><MoreHorizontal size={19}/></div>
+        </div>
+      </aside>
+
+      <main className="main-area">
+        <header className="topbar">
+          <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={21}/></button>
+          <div className="breadcrumb">UnHolly <span>/</span> <strong>{nav.find(n => n.id === tab)?.label}</strong></div>
+          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><div className="avatar-placeholder small">T</div></div>
+        </header>
+
+        <div className="content">
+          {tab === 'discover' && <section className="discover-view">
+            <div className="section-heading"><div><div className="eyebrow">CONEXIONES CON SENTIDO</div><h1>Hay personas por <em>descubrir.</em></h1><p>Conoce gente nueva, a tu ritmo y sin presiones.</p></div><button className="outline-btn" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal size={17}/> Filtros</button></div>
+            {showFilters && <div className="filter-panel"><strong>Preferencias de descubrimiento</strong><div className="filter-chips"><button className="chip selected">Cerca de mí</button><button className="chip">Relación</button><button className="chip">Amistad</button><button className="chip">Conocer gente</button></div><small>Los filtros avanzados estarán disponibles cuando conectemos tu cuenta.</small></div>}
+            <div className="discover-layout">
+              <div className="profile-card">
+                <div className="profile-photo" style={{ backgroundImage: `linear-gradient(180deg, transparent 48%, rgba(12,8,19,.9) 100%), url("${current.photo}")` }}>
+                  <span className="online-tag"><span/> Perfil de ejemplo</span>
+                  <button className="photo-more" onClick={() => flash('Opciones de perfil de demostración')}><MoreHorizontal size={21}/></button>
+                  <div className="photo-info"><div className="profile-name">{current.name}, {current.age}</div><div className="profile-location"><MapPin size={14}/>{current.city} · {current.distance}</div></div>
+                </div>
+                <div className="profile-details"><p>{current.bio}</p><div className="tag-row">{current.tags.map(t => <span className="tag" key={t}>{t}</span>)}</div><div className="card-actions"><button className="pass-action" onClick={passPerson} aria-label="Pasar"><X size={23}/></button><button className="like-action" onClick={likePerson} aria-label="Me gusta"><Heart size={24} fill="currentColor"/></button></div></div>
+              </div>
+              <aside className="discover-aside"><div className="aside-title"><Sparkles size={17}/> Una conexión empieza aquí</div><h3>No se trata de deslizar sin parar.</h3><p>Queremos que descubras personas con intereses y formas de ver la vida que conecten contigo.</p><div className="aside-stat"><div><strong>{liked.length}</strong><span>Likes enviados</span></div><div><strong>{remaining.length}</strong><span>Perfiles por ver</span></div></div><div className="privacy-note"><LockKeyhole size={17}/><span>Tu ubicación exacta nunca se muestra a otros perfiles.</span></div></aside>
+            </div>
+          </section>}
+
+          {tab === 'map' && <section><div className="section-heading"><div><div className="eyebrow">CERCA DE TI</div><h1>La ciudad también <em>conecta.</em></h1><p>Explora planes y encuentros compartidos.</p></div><button className="primary-btn" onClick={() => flash('La creación de quedadas llegará en una próxima etapa')}><Plus size={17}/> Crear quedada</button></div><div className="map-placeholder"><div className="map-grid"></div><div className="map-center"><MapPin size={28}/><strong>Málaga</strong><span>Vista de mapa de demostración</span></div><div className="map-pin pin-one"><MapPin/></div><div className="map-pin pin-two"><MapPin/></div><div className="map-pin pin-three"><MapPin/></div><div className="map-disclaimer">Ubicaciones ilustrativas · No representa personas reales</div></div><div className="event-row"><div className="event-icon"><Sparkles/></div><div><strong>Planes por descubrir</strong><p>Próximamente podrás encontrar quedadas públicas y proponer tus propios planes.</p></div></div></section>}
+
+          {tab === 'likes' && <section><div className="section-heading"><div><div className="eyebrow">INTERÉS MUTUO</div><h1>Tus <em>likes.</em></h1><p>Personas a las que has mostrado interés en esta demo.</p></div></div><div className="people-grid">{liked.length ? people.filter(p => liked.includes(p.id)).map(p => <div className="person-tile" key={p.id}><img src={p.photo} alt="Perfil de ejemplo"/><div><strong>{p.name}, {p.age}</strong><small>{p.city}</small></div></div>) : <div className="empty-state"><Heart size={28}/><h3>Aún no has enviado likes</h3><p>Cuando alguien te llame la atención, toca el corazón para mostrar interés.</p><button className="primary-btn" onClick={() => setTab('discover')}>Descubrir personas</button></div>}</div></section>}
+
+          {tab === 'chats' && <section><div className="section-heading"><div><div className="eyebrow">CONVERSACIONES</div><h1>Un hola puede ser <em>el comienzo.</em></h1><p>Tus conversaciones, en un solo lugar.</p></div></div><div className="chat-layout"><div className="chat-list">{chats.map(c => <button className={`chat-list-item ${activeChat === c.id ? 'selected' : ''}`} key={c.id} onClick={() => setActiveChat(c.id)}><img src={c.photo} alt=""/><div><strong>{c.name}</strong><small>{c.preview}</small></div><time>{c.time}</time></button>)}</div><div className="chat-window">{active ? <><div className="chat-head"><img src={active.photo} alt=""/><div><strong>{active.name}</strong><small>Conversación de demostración</small></div></div><div className="messages">{active.messages.map((m, i) => <div className={`bubble ${i === active.messages.length - 1 ? 'mine' : ''}`} key={i}>{m}</div>)}</div><form className="message-form" onSubmit={e => { e.preventDefault(); sendMessage() }}><input value={message} onChange={e => setMessage(e.target.value)} placeholder="Escribe un mensaje…"/><button className="send-btn" type="submit"><Send size={17}/></button></form></> : <div className="chat-empty"><MessageCircle size={30}/><strong>Elige una conversación</strong><span>Selecciona un chat para ver los mensajes.</span></div>}</div></div></section>}
+
+          {tab === 'profile' && <section><div className="section-heading"><div><div className="eyebrow">TU IDENTIDAD</div><h1>Este espacio es <em>tuyo.</em></h1><p>Más adelante podrás completar tu perfil y tus preferencias.</p></div></div><div className="settings-card"><div className="profile-edit-avatar">T</div><div className="profile-edit-fields"><label>Nombre visible<input value={profileName} onChange={e => setProfileName(e.target.value)} maxLength={30}/></label><div className="profile-progress"><span>Perfil de demostración</span><span>Vista previa</span></div><div className="progress-track"><span/></div><p>Los cambios de esta pantalla solo se guardan temporalmente en este navegador.</p></div></div><div className="settings-row"><ShieldCheck/><div><strong>Privacidad y seguridad</strong><small>Controles de cuenta, bloqueo y denuncias.</small></div><ChevronRight/></div><div className="settings-row"><LockKeyhole/><div><strong>Datos y permisos</strong><small>Gestiona la información que compartes.</small></div><ChevronRight/></div></section>}
+        </div>
+        <footer className="app-footer"><span>UnHolly © 2026</span><span>{isSupabaseConfigured ? 'Servicios conectados' : 'Entorno de demostración · Backend pendiente'}</span><span>Hecho para conectar 💜</span></footer>
+      </main>
+      {notice && <div className="toast"><Check size={17}/>{notice}</div>}
+      <nav className="mobile-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setActiveChat(null) }}><item.icon size={20}/><span>{item.label}</span></button>)}</nav>
+    </div>
+  )
+}
+
+export default App
