@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Heart, Compass, MapPin, MessageCircle, UserRound, ShieldCheck,
   Sparkles, SlidersHorizontal, Bell, Plus, Send, ChevronRight,
