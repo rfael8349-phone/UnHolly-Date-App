@@ -5,6 +5,7 @@ import {
   Check, Crown, X, Menu, MoreHorizontal, LockKeyhole, Settings, LogOut, CircleHelp
 } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
+import { AccountSettings } from './AccountSettings'
 
 type Tab = 'discover' | 'map' | 'likes' | 'chats' | 'profile'
 type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; photo: string }
