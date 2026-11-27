@@ -148,3 +148,22 @@
 .game-result{display:grid;gap:10px;margin:16px 0;padding:14px;border:1px solid #a879ff44;border-radius:12px;background:#a879ff12;color:#e8d9ff;font-size:12px}
 .game-result span{font-size:10px;color:#bfaed0}
 @media(max-width:420px){.game-options{grid-template-columns:1fr}.game-question{font-size:15px}}
+
+
+/* Intenciones de citas y herramientas contra el ghosting */
+.intentions-intro{display:grid;gap:4px;margin:6px 0 2px}
+.intentions-intro strong{font-size:13px;color:#f1e8fb}
+.intentions-intro small{font-size:10px;color:#a99ab9}
+.intention-options{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.intention-options button{display:flex;align-items:center;gap:8px;min-height:48px;padding:10px;border:1px solid var(--glass-line);border-radius:11px;background:rgba(255,255,255,.035);color:#e9e0f2;text-align:left;font-size:10px;transition:.2s}
+.intention-options button span{font-size:17px}
+.intention-options button b{margin-left:auto;color:#bba0dc}
+.intention-options button.selected{border-color:#b78aff;background:#a879ff20;color:#fff}
+.connection-tools-btn{display:flex;align-items:center;gap:3px;margin-left:auto;padding:7px 9px;border:1px solid var(--glass-line);border-radius:9px;background:#a879ff12;color:#d9c6f2;font-size:10px}
+.connection-dialog{width:min(470px,calc(100% - 28px))}
+.connection-choice{display:grid;gap:4px;width:100%;margin:7px 0;padding:12px;border:1px solid var(--glass-line);border-radius:11px;background:rgba(255,255,255,.035);color:#f1e9fa;text-align:left}
+.connection-choice strong{font-size:11px}
+.connection-choice small{font-size:10px;color:#ad9fbb}
+.connection-choice:hover{border-color:#b58aff;background:#a879ff16}
+.connection-divider{margin:13px 0 5px;color:#c1a8dd;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+@media(max-width:480px){.intention-options{grid-template-columns:1fr}.connection-tools-btn{font-size:9px;padding:6px}}
