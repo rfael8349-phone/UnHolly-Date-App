@@ -31,3 +31,32 @@
 .account-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:24px;padding:13px;border:1px solid #e4779560;border-radius:11px;background:#a53c5618;color:#ff9daf;font-size:12px;font-weight:700}
 .account-version{text-align:center;color:#776b83;font-size:9px;margin-top:20px}
 @media(max-width:700px){.account-panel{width:min(390px,100%);padding:24px 19px}.settings-backdrop{align-items:stretch}}
+
+
+/* Configuración ampliada */
+.account-avatar{border:0;cursor:pointer}
+.settings-backdrop{position:fixed;inset:0;z-index:20;background:#08060dcc;backdrop-filter:blur(7px);display:flex;justify-content:flex-end}
+.account-panel{width:min(430px,100%);height:100%;overflow:auto;background:#191424;border-left:1px solid var(--line);box-shadow:-20px 0 70px #0008;padding:26px 23px}
+.account-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px}
+.account-panel-head h2{font:800 23px Manrope;margin:7px 0 0}
+.account-summary{display:flex;align-items:center;gap:13px;padding:17px;border:1px solid var(--line);border-radius:15px;background:#211a2d;margin-bottom:12px}
+.account-large{width:48px;height:48px;flex-shrink:0}
+.account-summary strong,.account-summary small{display:block}.account-summary strong{font-size:13px}.account-summary small{font-size:10px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}
+.account-option{width:100%;display:flex;align-items:center;gap:13px;text-align:left;padding:15px 10px;background:transparent;border:0;border-bottom:1px solid var(--line);color:#c6a9f2}
+.account-option>span{flex:1}.account-option strong,.account-option small{display:block}.account-option strong{font-size:12px;color:#f1eaf8}.account-option small{font-size:10px;color:var(--muted);margin-top:4px}.account-option>svg:last-child{color:#8e829b}.account-option:hover{background:#ffffff08}
+.account-logout{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:22px;padding:13px;border:1px solid #e4779560;border-radius:11px;background:#a53c5618;color:#ff9daf;font-size:12px;font-weight:700}
+.account-version{text-align:center;color:#776b83;font-size:9px;margin-top:18px}
+.settings-back{display:flex;align-items:center;gap:4px;border:0;background:none;color:#c5a5f4;padding:0 0 12px;font-size:11px}
+.settings-form{display:grid;gap:16px}.settings-help{font-size:11px;line-height:1.6;color:var(--muted);margin:0}
+.settings-form>label{display:grid;gap:8px;font-size:11px;color:#d9cce5}
+.settings-form input:not([type=checkbox]):not([type=range]),.settings-form select{width:100%;min-width:0;border:1px solid var(--line);border-radius:9px;background:#110d19;color:#fff;padding:11px;font:inherit;color-scheme:dark}
+.settings-form input[type=range]{width:100%;accent-color:#a879ff}
+.settings-two{display:grid;grid-template-columns:1fr 1fr;gap:12px}.settings-two label{display:grid;gap:8px;font-size:11px;color:#d9cce5}
+.settings-field>strong,.settings-field>small{display:block}.settings-field>strong{font-size:12px}.settings-field>small{font-size:10px;color:var(--muted);margin:5px 0 11px}
+.settings-choice-grid{display:flex;flex-wrap:wrap;gap:7px}.settings-choice-grid button{border:1px solid var(--line);border-radius:30px;background:#ffffff06;color:#c9b9d8;padding:8px 11px;font-size:10px}.settings-choice-grid button.selected{background:#8c61d52b;border-color:#a879ff;color:#e0caff}
+.settings-note{display:flex;gap:8px;align-items:flex-start;padding:11px;border:1px solid #a879ff30;border-radius:10px;background:#a879ff0d;color:#bfaed0;font-size:10px;line-height:1.5}.settings-note svg{flex-shrink:0;color:#c09aff}
+.settings-save{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;background:linear-gradient(110deg,#a879ff,#8053d1);color:white;padding:12px;font-size:11px;font-weight:700}
+.settings-toggle{display:flex!important;align-items:center;justify-content:space-between;gap:12px;padding:13px;border:1px solid var(--line);border-radius:11px;background:#ffffff05}
+.settings-toggle span{display:grid;gap:5px}.settings-toggle strong{font-size:11px}.settings-toggle small{font-size:10px;color:var(--muted);line-height:1.4}.settings-toggle input{accent-color:#a879ff;flex-shrink:0}
+.settings-help-card{display:grid;gap:10px;justify-items:start;padding:18px;border:1px solid var(--line);border-radius:13px;background:#211a2d;color:#c8a9ff}.settings-help-card strong{color:#fff;font-size:13px}.settings-help-card p{color:var(--muted);font-size:11px;line-height:1.6;margin:0}
+@media(max-width:700px){.account-panel{width:min(390px,100%);padding:23px 18px}.settings-backdrop{align-items:stretch}}
