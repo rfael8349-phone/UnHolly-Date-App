@@ -34,7 +34,6 @@ export function DemoApp() {
   const [profileName, setProfileName] = useState('Tu perfil')
   const [mobileMenu, setMobileMenu] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
-  const [settingsOpen, setSettingsOpen] = useState(false)
   const [accountEmail, setAccountEmail] = useState('')
 
   useEffect(() => {
@@ -98,7 +97,7 @@ export function DemoApp() {
         <header className="topbar">
           <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={21}/></button>
           <div className="breadcrumb">UnHolly <span>/</span> <strong>{nav.find(n => n.id === tab)?.label}</strong></div>
-          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setSettingsOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setSettingsOpen(true)}>T</button></div>
+          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setSettingsOpen(true)}>T</button></div>
         </header>
 
         <div className="content">
