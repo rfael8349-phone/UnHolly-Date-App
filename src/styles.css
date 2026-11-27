@@ -81,3 +81,10 @@
 .report-dialog small{display:block;margin-top:15px}.report-close{position:absolute;right:17px;top:17px}
 .report-reason{width:100%;display:flex;justify-content:space-between;align-items:center;padding:13px 3px;border:0;border-bottom:1px solid var(--line);background:transparent;color:#eee5f8;text-align:left;font-size:11px}
 @media(max-width:700px){.like-person>img{height:180px}.coin-balance{justify-items:start}.section-heading:has(.coin-balance){flex-wrap:wrap}}
+
+
+.reply-demo{margin-left:auto;border:1px solid #a879ff55;background:#a879ff17;color:#decaff;border-radius:9px;padding:8px;font-size:9px}
+.coin-store{width:min(430px,calc(100% - 28px))}
+.coin-pack{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}
+.coin-pack strong{flex:1}.coin-pack span{color:#d8c0ff}.coin-pack button{border:1px solid #a879ff55;border-radius:9px;background:#a879ff18;color:#e3d1ff;padding:7px 10px;font-size:10px}
+@media(max-width:700px){.reply-demo{font-size:8px;padding:7px;max-width:145px}}
