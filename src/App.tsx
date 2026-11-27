@@ -145,11 +145,11 @@ export function DemoApp() {
         </div>
         <footer className="app-footer"><span>UnHolly © 2026</span><span>{isSupabaseConfigured ? 'Servicios conectados' : 'Entorno de demostración · Backend pendiente'}</span><span>Hecho para conectar 💜</span></footer>
       </main>
-      {settingsOpen && <div className="settings-backdrop" onClick={() => setSettingsOpen(false)}>
+      {accountOpen && <div className="settings-backdrop" onClick={() => setAccountOpen(false)}>
         <section className="account-panel" role="dialog" aria-modal="true" aria-label="Opciones de cuenta" onClick={e => e.stopPropagation()}>
-          <div className="account-panel-head"><div><span className="eyebrow">TU ESPACIO</span><h2>Cuenta y opciones</h2></div><button className="icon-btn" aria-label="Cerrar" onClick={() => setSettingsOpen(false)}><X size={18}/></button></div>
+          <div className="account-panel-head"><div><span className="eyebrow">TU ESPACIO</span><h2>Cuenta y opciones</h2></div><button className="icon-btn" aria-label="Cerrar" onClick={() => setAccountOpen(false)}><X size={18}/></button></div>
           <div className="account-summary"><div className="avatar-placeholder account-large">T</div><div><strong>{profileName}</strong><small>{accountEmail || 'Cuenta iniciada'}</small></div></div>
-          <button className="account-option" onClick={() => { setSettingsOpen(false); setTab('profile') }}><UserRound size={18}/><span><strong>Mi perfil</strong><small>Ver y editar tu información</small></span><ChevronRight size={17}/></button>
+          <button className="account-option" onClick={() => { setAccountOpen(false); setTab('profile') }}><UserRound size={18}/><span><strong>Mi perfil</strong><small>Ver y editar tu información</small></span><ChevronRight size={17}/></button>
           <button className="account-option" onClick={() => flash('Las preferencias de privacidad estarán disponibles en la próxima actualización.')}><LockKeyhole size={18}/><span><strong>Privacidad y seguridad</strong><small>Controla quién puede encontrarte</small></span><ChevronRight size={17}/></button>
           <button className="account-option" onClick={() => flash('Las notificaciones se configurarán próximamente.')}><Bell size={18}/><span><strong>Notificaciones</strong><small>Preferencias de avisos</small></span><ChevronRight size={17}/></button>
           <button className="account-option" onClick={() => flash('Centro de ayuda próximamente.')}><CircleHelp size={18}/><span><strong>Ayuda y soporte</strong><small>Preguntas y asistencia</small></span><ChevronRight size={17}/></button>
