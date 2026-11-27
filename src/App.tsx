@@ -50,7 +50,7 @@ export function DemoApp() {
     if (!supabase) { flash('La sesión de demostración no está conectada.'); return }
     const { error } = await supabase.auth.signOut()
     if (error) flash('No se pudo cerrar sesión: ' + error.message)
-    else { setAccountOpen(false); setLegacyAccountOpen(false); flash('Has cerrado sesión correctamente.') }
+    else { setAccountOpen(false); flash('Has cerrado sesión correctamente.') }
   }
 
   const current = people[index % people.length]
