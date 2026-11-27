@@ -34,6 +34,7 @@ export function DemoApp() {
   const [profileName, setProfileName] = useState('Tu perfil')
   const [mobileMenu, setMobileMenu] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [legacyAccountOpen, setLegacyAccountOpen] = useState(false)
   const [coins, setCoins] = useState(20)
   const [pendingIntro, setPendingIntro] = useState<number[]>([])
   const [coinStoreOpen, setCoinStoreOpen] = useState(false)
@@ -50,7 +51,7 @@ export function DemoApp() {
     if (!supabase) { flash('La sesión de demostración no está conectada.'); return }
     const { error } = await supabase.auth.signOut()
     if (error) flash('No se pudo cerrar sesión: ' + error.message)
-    else { setAccountOpen(false); flash('Has cerrado sesión correctamente.') }
+    else { setAccountOpen(false); setLegacyAccountOpen(false); flash('Has cerrado sesión correctamente.') }
   }
 
   const current = people[index % people.length]
@@ -124,7 +125,7 @@ export function DemoApp() {
         <header className="topbar">
           <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={21}/></button>
           <div className="breadcrumb">UnHolly <span>/</span> <strong>{nav.find(n => n.id === tab)?.label}</strong></div>
-          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setAccountOpen(true)}>T</button></div>
+          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setLegacyAccountOpen(true)}>T</button></div>
         </header>
 
         <div className="content">
@@ -154,18 +155,6 @@ export function DemoApp() {
         </div>
         <footer className="app-footer"><span>UnHolly © 2026</span><span>{isSupabaseConfigured ? 'Servicios conectados' : 'Entorno de demostración · Backend pendiente'}</span><span>Hecho para conectar 💜</span></footer>
       </main>
-      {accountOpen && <div className="settings-backdrop" onClick={() => setAccountOpen(false)}>
-        <section className="account-panel" role="dialog" aria-modal="true" aria-label="Opciones de cuenta" onClick={e => e.stopPropagation()}>
-          <div className="account-panel-head"><div><span className="eyebrow">TU ESPACIO</span><h2>Cuenta y opciones</h2></div><button className="icon-btn" aria-label="Cerrar" onClick={() => setAccountOpen(false)}><X size={18}/></button></div>
-          <div className="account-summary"><div className="avatar-placeholder account-large">T</div><div><strong>{profileName}</strong><small>{accountEmail || 'Cuenta iniciada'}</small></div></div>
-          <button className="account-option" onClick={() => { setAccountOpen(false); setTab('profile') }}><UserRound size={18}/><span><strong>Mi perfil</strong><small>Ver y editar tu información</small></span><ChevronRight size={17}/></button>
-          <button className="account-option" onClick={() => flash('Las preferencias de privacidad estarán disponibles en la próxima actualización.')}><LockKeyhole size={18}/><span><strong>Privacidad y seguridad</strong><small>Controla quién puede encontrarte</small></span><ChevronRight size={17}/></button>
-          <button className="account-option" onClick={() => flash('Las notificaciones se configurarán próximamente.')}><Bell size={18}/><span><strong>Notificaciones</strong><small>Preferencias de avisos</small></span><ChevronRight size={17}/></button>
-          <button className="account-option" onClick={() => flash('Centro de ayuda próximamente.')}><CircleHelp size={18}/><span><strong>Ayuda y soporte</strong><small>Preguntas y asistencia</small></span><ChevronRight size={17}/></button>
-          <button className="account-logout" onClick={signOut}><LogOut size={18}/> Cerrar sesión</button>
-          <p className="account-version">UnHolly · Versión inicial</p>
-        </section>
-      </div>}
       {coinStoreOpen && <div className="settings-backdrop" onClick={() => setCoinStoreOpen(false)}><section className="report-dialog coin-store" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="icon-btn report-close" onClick={() => setCoinStoreOpen(false)}><X size={18}/></button><span className="eyebrow">MONEDERO UNHOLLY</span><h2>Monedas para primeros saludos</h2><p>Los paquetes son una propuesta de precios. Los pagos todavía no están conectados.</p>{[{n:30,p:'0,99 €'},{n:80,p:'1,99 €'},{n:200,p:'3,99 €'}].map(pack => <div className="coin-pack" key={pack.n}><strong>🪙 {pack.n} monedas</strong><span>{pack.p}</span><button onClick={() => flash('Las compras estarán disponibles cuando conectemos pagos seguros.')}>Elegir</button></div>)}<small>Solo se descuentan 5 monedas al enviar un primer saludo. Si la otra persona responde, se devuelven automáticamente cuando el sistema de mensajería esté conectado.</small></section></div>}{reportTarget && <div className="settings-backdrop" onClick={() => setReportTarget(null)}><section className="report-dialog" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="icon-btn report-close" onClick={() => setReportTarget(null)}><X size={18}/></button><span className="eyebrow">CENTRO DE SEGURIDAD</span><h2>Denunciar a {reportTarget.name}</h2><p>Elige el motivo. La denuncia es privada y será revisada por moderación.</p>{['Spam o mensajes repetidos','Acoso o intimidación','Contenido sexual no solicitado','Perfil falso o suplantación','Amenazas o comportamiento peligroso','Otro motivo'].map(reason => <button className="report-reason" key={reason} onClick={() => reportPerson(reportTarget, reason)}>{reason}<ChevronRight size={16}/></button>)}<small>No se suspende una cuenta solo por acumular denuncias: se revisan pruebas, gravedad y reincidencia. Los casos graves pueden implicar suspensión o baneo.</small></section></div>}{notice && <div className="toast"><Check size={17}/>{notice}</div>}
       {accountOpen && <AccountSettings onClose={() => setAccountOpen(false)} profileName={profileName} setProfileName={setProfileName} flash={flash}/>} 
       <nav className="mobile-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setActiveChat(null) }}><item.icon size={20}/><span>{item.label}</span></button>)}</nav>
