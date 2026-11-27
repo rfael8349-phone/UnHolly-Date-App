@@ -20,7 +20,7 @@ const initialChats = [
   { id: 2, name: 'Clara', preview: '¿Te apetece un café?', time: 'Ayer', photo: people[1].photo, messages: ['Hola 😊', '¿Te apetece un café esta semana?'] },
 ]
 
-function App() {
+export function DemoApp() {
   const [tab, setTab] = useState<Tab>('discover')
   const [index, setIndex] = useState(0)
   const [liked, setLiked] = useState<number[]>([])
@@ -117,4 +117,8 @@ function App() {
   )
 }
 
-export default App
+import { AuthGate } from './AuthGate'
+
+export default function App() {
+  return <AuthGate><DemoApp /></AuthGate>
+}
