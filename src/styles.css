@@ -167,3 +167,9 @@
 .connection-choice:hover{border-color:#b58aff;background:#a879ff16}
 .connection-divider{margin:13px 0 5px;color:#c1a8dd;font-size:10px;text-transform:uppercase;letter-spacing:.08em}
 @media(max-width:480px){.intention-options{grid-template-columns:1fr}.connection-tools-btn{font-size:9px;padding:6px}}
+
+
+.looking-for-row{display:grid;gap:6px;margin-top:12px}
+.looking-for-row>small{font-size:8px;font-weight:800;letter-spacing:.13em;color:#bda2dd}
+.looking-for-row>div{display:flex;flex-wrap:wrap;gap:6px}
+.looking-for-tag{display:inline-flex;padding:6px 9px;border:1px solid #b78aff38;border-radius:20px;background:#a879ff12;color:#e5d4fb;font-size:9px}
