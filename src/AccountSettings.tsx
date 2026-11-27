@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { X, ChevronLeft, ChevronRight, LogOut, UserRound, SlidersHorizontal, Shield, Bell, Palette, HelpCircle, Save } from 'lucide-react'
 import { supabase } from './lib/supabase'
 
@@ -16,21 +16,19 @@ export function AccountSettings({onClose,profileName,setProfileName,flash}:Props
  const [privateMode,setPrivateMode]=useState(false)
  const [notifications,setNotifications]=useState(true)
  const [email,setEmail]=useState('')
- supabase.auth.getUser().then(({data})=>setEmail(data.user?.email||''))
+ useEffect(()=>{let alive=true;supabase.auth.getUser().then(({data})=>{if(alive)setEmail(data.user?.email||'')});return()=>{alive=false}},[])
  const choices=['Delgada','Atlética','Media','Curvilínea','Grande / gordita','Robusta','Cualquier complexión']
  const title:Record<string,string>={home:'Configuración',profile:'Mi cuenta y perfil',search:'Preferencias de búsqueda',privacy:'Privacidad y seguridad',notifications:'Notificaciones',appearance:'Apariencia',help:'Ayuda y soporte'}
  const save=()=>{flash('Cambios guardados en esta vista. La sincronización se conectará en una próxima etapa.');setPage('home')}
  return <div className="settings-backdrop" onClick={onClose}><section className="account-panel" onClick={e=>e.stopPropagation()}>
   <header className="account-panel-head"><div>{page!=='home'&&<button className="settings-back" onClick={()=>setPage('home')}><ChevronLeft size={16}/> Volver</button>}<div className="eyebrow">UNHOLLY · TU CUENTA</div><h2>{title[page]}</h2></div><button className="icon-btn" onClick={onClose}><X size={18}/></button></header>
   {page==='home'&&<><div className="account-summary"><div className="avatar-placeholder account-large">{profileName.slice(0,1).toUpperCase()}</div><div><strong>{profileName}</strong><small>{email}</small></div></div>
-   {[
-    ['profile','Mi cuenta y perfil','Datos personales y correo',UserRound],
-    ['search','Preferencias de búsqueda','Ciudad, distancia, edades y tipo de persona',SlidersHorizontal],
-    ['privacy','Privacidad y seguridad','Visibilidad y control de datos',Shield],
-    ['notifications','Notificaciones','Likes, matches, mensajes y eventos',Bell],
-    ['appearance','Apariencia','Tema y tamaño de texto',Palette],
-    ['help','Ayuda y soporte','Normas y asistencia',HelpCircle]
-   ].map(([id,name,desc,Icon])=><button className="account-option" key={String(id)} onClick={()=>setPage(String(id))}><Icon/><span><strong>{String(name)}</strong><small>{String(desc)}</small></span><ChevronRight/></button>)}
+   <button className="account-option" onClick={()=>setPage('profile')}><UserRound/><span><strong>Mi cuenta y perfil</strong><small>Datos personales y correo</small></span><ChevronRight/></button>
+   <button className="account-option" onClick={()=>setPage('search')}><SlidersHorizontal/><span><strong>Preferencias de búsqueda</strong><small>Ciudad, distancia, edades y tipo de persona</small></span><ChevronRight/></button>
+   <button className="account-option" onClick={()=>setPage('privacy')}><Shield/><span><strong>Privacidad y seguridad</strong><small>Visibilidad y control de datos</small></span><ChevronRight/></button>
+   <button className="account-option" onClick={()=>setPage('notifications')}><Bell/><span><strong>Notificaciones</strong><small>Likes, matches, mensajes y eventos</small></span><ChevronRight/></button>
+   <button className="account-option" onClick={()=>setPage('appearance')}><Palette/><span><strong>Apariencia</strong><small>Tema y tamaño de texto</small></span><ChevronRight/></button>
+   <button className="account-option" onClick={()=>setPage('help')}><HelpCircle/><span><strong>Ayuda y soporte</strong><small>Normas y asistencia</small></span><ChevronRight/></button>
    <button className="account-logout" onClick={async()=>{const {error}=await supabase.auth.signOut();if(error)flash(error.message);else onClose()}}><LogOut size={17}/> Cerrar sesión</button><div className="account-version">UnHolly · Configuración</div></>}
   {page==='search'&&<div className="settings-form"><p className="settings-help">Define a quién quieres encontrar. Estas preferencias son privadas.</p>
    <label>Ciudad o zona<input value={city} onChange={e=>setCity(e.target.value)} placeholder="Ej. Málaga"/></label>
