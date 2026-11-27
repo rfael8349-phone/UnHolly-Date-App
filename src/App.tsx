@@ -34,6 +34,8 @@ export function DemoApp() {
   const [profileName, setProfileName] = useState('Tu perfil')
   const [mobileMenu, setMobileMenu] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [coins, setCoins] = useState(20)
+  const [reportTarget, setReportTarget] = useState<Person | null>(null)
   const [accountEmail, setAccountEmail] = useState('')
 
   useEffect(() => {
@@ -46,7 +48,7 @@ export function DemoApp() {
     if (!supabase) { flash('La sesión de demostración no está conectada.'); return }
     const { error } = await supabase.auth.signOut()
     if (error) flash('No se pudo cerrar sesión: ' + error.message)
-    else { setSettingsOpen(false); flash('Has cerrado sesión correctamente.') }
+    else { setAccountOpen(false); flash('Has cerrado sesión correctamente.') }
   }
 
   const current = people[index % people.length]
@@ -61,10 +63,26 @@ export function DemoApp() {
     setIndex(i => i + 1)
   }
   function passPerson() { setPassed(old => [...old, current.id]); setIndex(i => i + 1) }
+  function openIntro(p: Person) {
+    if (coins < 5) { flash('Necesitas 5 monedas para enviar un primer saludo.'); return }
+    setCoins(v => v - 5)
+    setChats(old => old.some(c => c.id === p.id) ? old : [...old, { id: p.id, name: p.name, preview: 'Tu primer saludo', time: 'Ahora', photo: p.photo, messages: ['Tu primer saludo está enviado.'] }])
+    setActiveChat(p.id); setTab('chats')
+    flash('Primer saludo enviado · 5 monedas reservadas hasta recibir respuesta')
+  }
+  function reportPerson(p: Person, reason: string) {
+    setReportTarget(null)
+    flash('Denuncia recibida. El equipo de seguridad revisará el caso.')
+  }
   function sendMessage() {
     if (!message.trim() || !activeChat) return
     setChats(old => old.map(c => c.id === activeChat ? { ...c, preview: message, time: 'Ahora', messages: [...c.messages, message] } : c))
     setMessage('')
+  }
+  function addDemoAttachment(label: string) {
+    if (!activeChat) return
+    setChats(old => old.map(c => c.id === activeChat ? { ...c, preview: label, time: 'Ahora', messages: [...c.messages, label] } : c))
+    flash(label + ' añadido a la conversación de demostración')
   }
 
   const nav = [
@@ -97,7 +115,7 @@ export function DemoApp() {
         <header className="topbar">
           <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={21}/></button>
           <div className="breadcrumb">UnHolly <span>/</span> <strong>{nav.find(n => n.id === tab)?.label}</strong></div>
-          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setSettingsOpen(true)}>T</button></div>
+          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setAccountOpen(true)}>T</button></div>
         </header>
 
         <div className="content">
@@ -119,9 +137,9 @@ export function DemoApp() {
 
           {tab === 'map' && <section><div className="section-heading"><div><div className="eyebrow">CERCA DE TI</div><h1>La ciudad también <em>conecta.</em></h1><p>Explora planes y encuentros compartidos.</p></div><button className="primary-btn" onClick={() => flash('La creación de quedadas llegará en una próxima etapa')}><Plus size={17}/> Crear quedada</button></div><div className="map-placeholder"><div className="map-grid"></div><div className="map-center"><MapPin size={28}/><strong>Málaga</strong><span>Vista de mapa de demostración</span></div><div className="map-pin pin-one"><MapPin/></div><div className="map-pin pin-two"><MapPin/></div><div className="map-pin pin-three"><MapPin/></div><div className="map-disclaimer">Ubicaciones ilustrativas · No representa personas reales</div></div><div className="event-row"><div className="event-icon"><Sparkles/></div><div><strong>Planes por descubrir</strong><p>Próximamente podrás encontrar quedadas públicas y proponer tus propios planes.</p></div></div></section>}
 
-          {tab === 'likes' && <section><div className="section-heading"><div><div className="eyebrow">INTERÉS MUTUO</div><h1>Tus <em>likes.</em></h1><p>Personas a las que has mostrado interés en esta demo.</p></div></div><div className="people-grid">{liked.length ? people.filter(p => liked.includes(p.id)).map(p => <div className="person-tile" key={p.id}><img src={p.photo} alt="Perfil de ejemplo"/><div><strong>{p.name}, {p.age}</strong><small>{p.city}</small></div></div>) : <div className="empty-state"><Heart size={28}/><h3>Aún no has enviado likes</h3><p>Cuando alguien te llame la atención, toca el corazón para mostrar interés.</p><button className="primary-btn" onClick={() => setTab('discover')}>Descubrir personas</button></div>}</div></section>}
+          {tab === 'likes' && <section><div className="section-heading"><div><div className="eyebrow">INTERÉS MUTUO</div><h1>Tus <em>likes.</em></h1><p>Personas a las que has mostrado interés en esta demo.</p></div></div><div className="people-grid">{liked.length ? people.filter(p => liked.includes(p.id)).map(p => <div className="person-tile like-person" key={p.id}><img src={p.photo} alt="Perfil de ejemplo"/><div className="like-person-info"><strong>{p.name}, {p.age}</strong><small>{p.city}</small><div className="like-person-actions"><button className="primary-btn" onClick={() => openIntro(p)}><MessageCircle size={14}/> Enviar mensaje · 5 🪙</button><button className="quiet-action" onClick={() => flash('Perfil ocultado en esta demo')}>No me interesa</button><button className="quiet-action danger-action" onClick={() => setReportTarget(p)}>Denunciar</button></div></div></div>) : <div className="empty-state"><Heart size={28}/><h3>Aún no has enviado likes</h3><p>Cuando alguien te llame la atención, toca el corazón para mostrar interés.</p><button className="primary-btn" onClick={() => setTab('discover')}>Descubrir personas</button></div>}</div></section>}
 
-          {tab === 'chats' && <section><div className="section-heading"><div><div className="eyebrow">CONVERSACIONES</div><h1>Un hola puede ser <em>el comienzo.</em></h1><p>Tus conversaciones, en un solo lugar.</p></div></div><div className="chat-layout"><div className="chat-list">{chats.map(c => <button className={`chat-list-item ${activeChat === c.id ? 'selected' : ''}`} key={c.id} onClick={() => setActiveChat(c.id)}><img src={c.photo} alt=""/><div><strong>{c.name}</strong><small>{c.preview}</small></div><time>{c.time}</time></button>)}</div><div className="chat-window">{active ? <><div className="chat-head"><img src={active.photo} alt=""/><div><strong>{active.name}</strong><small>Conversación de demostración</small></div></div><div className="messages">{active.messages.map((m, i) => <div className={`bubble ${i === active.messages.length - 1 ? 'mine' : ''}`} key={i}>{m}</div>)}</div><form className="message-form" onSubmit={e => { e.preventDefault(); sendMessage() }}><input value={message} onChange={e => setMessage(e.target.value)} placeholder="Escribe un mensaje…"/><button className="send-btn" type="submit"><Send size={17}/></button></form></> : <div className="chat-empty"><MessageCircle size={30}/><strong>Elige una conversación</strong><span>Selecciona un chat para ver los mensajes.</span></div>}</div></div></section>}
+          {tab === 'chats' && <section><div className="section-heading"><div><div className="eyebrow">CONVERSACIONES</div><h1>Un hola puede ser <em>el comienzo.</em></h1><p>Tus conversaciones, en un solo lugar.</p></div><div className="coin-balance"><span>🪙 {coins} monedas</span><button onClick={() => setCoins(v => v + 5)}>+5 gratis (demo)</button></div></div><div className="chat-layout"><div className="chat-list">{chats.map(c => <button className={`chat-list-item ${activeChat === c.id ? 'selected' : ''}`} key={c.id} onClick={() => setActiveChat(c.id)}><img src={c.photo} alt=""/><div><strong>{c.name}</strong><small>{c.preview}</small></div><time>{c.time}</time></button>)}</div><div className="chat-window">{active ? <><div className="chat-head"><img src={active.photo} alt=""/><div><strong>{active.name}</strong><small>Conversación de demostración</small></div></div><div className="messages">{active.messages.map((m, i) => <div className={`bubble ${i === active.messages.length - 1 ? 'mine' : ''}`} key={i}>{m}</div>)}</div><div className="inbox-tools"><button onClick={() => addDemoAttachment('😊 Sticker')}>☺️ Sticker</button><button onClick={() => addDemoAttachment('GIF divertido')}>GIF</button><button onClick={() => addDemoAttachment('🎙️ Audio de prueba')}>🎙️ Audio</button><label className="attach-file">＋ Archivo<input type="file" onChange={e => { if (e.target.files?.[0]) addDemoAttachment('📎 ' + e.target.files[0].name) }}/></label></div><form className="message-form" onSubmit={e => { e.preventDefault(); sendMessage() }}><input value={message} onChange={e => setMessage(e.target.value)} placeholder="Escribe un mensaje…"/><button className="send-btn" type="submit"><Send size={17}/></button></form></> : <div className="chat-empty"><MessageCircle size={30}/><strong>Elige una conversación</strong><span>Selecciona un chat para ver los mensajes.</span></div>}</div></div></section>}
 
           {tab === 'profile' && <section><div className="section-heading"><div><div className="eyebrow">TU IDENTIDAD</div><h1>Este espacio es <em>tuyo.</em></h1><p>Más adelante podrás completar tu perfil y tus preferencias.</p></div></div><div className="settings-card"><div className="profile-edit-avatar">T</div><div className="profile-edit-fields"><label>Nombre visible<input value={profileName} onChange={e => setProfileName(e.target.value)} maxLength={30}/></label><div className="profile-progress"><span>Perfil de demostración</span><span>Vista previa</span></div><div className="progress-track"><span/></div><p>Los cambios de esta pantalla solo se guardan temporalmente en este navegador.</p></div></div><div className="settings-row"><ShieldCheck/><div><strong>Privacidad y seguridad</strong><small>Controles de cuenta, bloqueo y denuncias.</small></div><ChevronRight/></div><div className="settings-row"><LockKeyhole/><div><strong>Datos y permisos</strong><small>Gestiona la información que compartes.</small></div><ChevronRight/></div></section>}
         </div>
@@ -139,7 +157,7 @@ export function DemoApp() {
           <p className="account-version">UnHolly · Versión inicial</p>
         </section>
       </div>}
-      {notice && <div className="toast"><Check size={17}/>{notice}</div>}
+      {reportTarget && <div className="settings-backdrop" onClick={() => setReportTarget(null)}><section className="report-dialog" role="dialog" aria-modal="true" onClick={e => e.stopPropagation()}><button className="icon-btn report-close" onClick={() => setReportTarget(null)}><X size={18}/></button><span className="eyebrow">CENTRO DE SEGURIDAD</span><h2>Denunciar a {reportTarget.name}</h2><p>Elige el motivo. La denuncia es privada y será revisada por moderación.</p>{['Spam o mensajes repetidos','Acoso o intimidación','Contenido sexual no solicitado','Perfil falso o suplantación','Amenazas o comportamiento peligroso','Otro motivo'].map(reason => <button className="report-reason" key={reason} onClick={() => reportPerson(reportTarget, reason)}>{reason}<ChevronRight size={16}/></button>)}<small>No se suspende una cuenta solo por acumular denuncias: se revisan pruebas, gravedad y reincidencia. Los casos graves pueden implicar suspensión o baneo.</small></section></div>}{notice && <div className="toast"><Check size={17}/>{notice}</div>}
       {accountOpen && <AccountSettings onClose={() => setAccountOpen(false)} profileName={profileName} setProfileName={setProfileName} flash={flash}/>} 
       <nav className="mobile-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setActiveChat(null) }}><item.icon size={20}/><span>{item.label}</span></button>)}</nav>
     </div>
