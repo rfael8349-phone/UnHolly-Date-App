@@ -53,3 +53,16 @@ Copia `.env.example` a `.env.local` y añade la URL del proyecto Supabase y su c
 ## Seguridad y privacidad
 
 UnHolly está pensado para mayores de 18 años. Antes de abrirlo al público habrá que implementar controles reales de edad, consentimiento, privacidad, seguridad, moderación y cumplimiento de RGPD/LOPDGDD. Las ubicaciones deben ser aproximadas y voluntarias. No se puede garantizar que un destinatario no grabe una pantalla con otro dispositivo.
+
+
+## Registro e inicio de sesión (etapa siguiente)
+
+La interfaz de autenticación ya está preparada para Supabase Auth. Cuando `.env.local` tenga `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY`, la aplicación mostrará registro e inicio de sesión. El alta solicita fecha de nacimiento y una confirmación de mayoría de edad; la validación del navegador es solo una primera barrera y **no sustituye una verificación de edad robusta antes del lanzamiento público**.
+
+Para activar el acceso:
+1. Crea un proyecto en https://supabase.com/.
+2. En SQL Editor, ejecuta `supabase/schema.sql`.
+3. Copia Project URL y la clave publicable/anon del proyecto a `.env.local` (no subas ese archivo a GitHub).
+4. En Authentication, configura la confirmación de correo y las URLs autorizadas para tu dominio.
+
+Hasta completar esos pasos, la aplicación seguirá en modo demostración. La interfaz actual de descubrimiento y chat todavía utiliza datos de ejemplo; no se deben presentar como usuarios o conversaciones reales.
