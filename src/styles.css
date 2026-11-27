@@ -129,3 +129,22 @@
 @keyframes toast-glass-in{from{opacity:0;transform:translateY(12px) scale(.97);backdrop-filter:blur(0)}to{opacity:1;transform:translateY(0) scale(1);backdrop-filter:blur(18px)}}
 @media(hover:none){.profile-card:hover,.person-tile:hover,.event-row:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+
+/* Intereses compartidos y minijuegos rompehielos */
+.interest-group{display:grid;gap:10px;padding:14px;border:1px solid var(--glass-line);border-radius:13px;background:rgba(255,255,255,.025)}
+.interest-group>strong{font-size:12px;color:#eadcff}
+.settings-interest-count{font-size:10px;color:#c5a5f4;text-align:right}
+.interest-group .settings-choice-grid{gap:7px}
+.interest-group .settings-choice-grid button{transition:background .2s ease,border-color .2s ease,transform .2s ease}
+.interest-group .settings-choice-grid button:active{transform:scale(.96)}
+.mini-game-dialog{width:min(460px,calc(100% - 28px))}
+.game-progress{padding:9px 11px;border:1px solid #a879ff30;border-radius:9px;background:#a879ff0d;color:#cbb6e8;font-size:10px;margin:14px 0}
+.game-question{font:700 17px/1.45 Manrope;color:#fff;margin:18px 0 13px}
+.game-options{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.game-options button{min-height:45px;padding:10px;border:1px solid var(--glass-line);border-radius:11px;background:rgba(255,255,255,.045);color:#eee4f8;font-size:11px;text-align:left}
+.game-options button:hover,.game-options button.chosen{border-color:#b58aff;background:#a879ff20}
+.game-options button:disabled{opacity:.72}
+.game-result{display:grid;gap:10px;margin:16px 0;padding:14px;border:1px solid #a879ff44;border-radius:12px;background:#a879ff12;color:#e8d9ff;font-size:12px}
+.game-result span{font-size:10px;color:#bfaed0}
+@media(max-width:420px){.game-options{grid-template-columns:1fr}.game-question{font-size:15px}}
