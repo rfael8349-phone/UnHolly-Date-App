@@ -32,6 +32,7 @@ export function DemoApp() {
   const [showFilters, setShowFilters] = useState(false)
   const [profileName, setProfileName] = useState('Tu perfil')
   const [mobileMenu, setMobileMenu] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [accountEmail, setAccountEmail] = useState('')
 
@@ -139,6 +140,7 @@ export function DemoApp() {
         </section>
       </div>}
       {notice && <div className="toast"><Check size={17}/>{notice}</div>}
+      {accountOpen && <AccountSettings onClose={() => setAccountOpen(false)} profileName={profileName} setProfileName={setProfileName} flash={flash}/>} 
       <nav className="mobile-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setActiveChat(null) }}><item.icon size={20}/><span>{item.label}</span></button>)}</nav>
     </div>
   )
