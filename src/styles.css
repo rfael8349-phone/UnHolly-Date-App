@@ -88,3 +88,44 @@
 .coin-pack{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}
 .coin-pack strong{flex:1}.coin-pack span{color:#d8c0ff}.coin-pack button{border:1px solid #a879ff55;border-radius:9px;background:#a879ff18;color:#e3d1ff;padding:7px 10px;font-size:10px}
 @media(max-width:700px){.reply-demo{font-size:8px;padding:7px;max-width:145px}}
+
+
+/* UnHolly · transiciones fluidas y cristal inspirado en iOS */
+:root{--glass-line:rgba(255,255,255,.13);--glass-fill:rgba(255,255,255,.065);--glass-highlight:rgba(255,255,255,.11)}
+.tab-transition{animation:glass-page-in .42s cubic-bezier(.2,.75,.25,1) both;transform-origin:50% 35%}
+@keyframes glass-page-in{0%{opacity:0;transform:translateY(12px) scale(.988);filter:blur(7px)}65%{filter:blur(0)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.topbar,.mobile-nav,.sidebar,.icon-btn,.nav-item,.outline-btn,.primary-btn,.pass-action,.like-action,.chat-list-item,.account-option,.settings-row,.person-tile,.profile-card,.plus-card,.filter-panel,.event-row,.settings-card,.report-dialog,.coin-store{
+  transition:background .24s ease,border-color .24s ease,box-shadow .28s ease,transform .28s cubic-bezier(.2,.75,.25,1),filter .28s ease;
+}
+.topbar{background:rgba(19,14,29,.72);backdrop-filter:blur(24px) saturate(165%);-webkit-backdrop-filter:blur(24px) saturate(165%);border-bottom:1px solid var(--glass-line)}
+.sidebar{background:rgba(19,14,29,.78);backdrop-filter:blur(26px) saturate(160%);-webkit-backdrop-filter:blur(26px) saturate(160%);border-right:1px solid var(--glass-line)}
+.mobile-nav{background:rgba(24,18,36,.78);backdrop-filter:blur(25px) saturate(170%);-webkit-backdrop-filter:blur(25px) saturate(170%);border-top:1px solid var(--glass-line)}
+.icon-btn,.outline-btn,.nav-item,.chat-list-item,.account-option,.settings-row,.inbox-tools button,.attach-file,.quiet-action{
+  -webkit-tap-highlight-color:transparent
+}
+.icon-btn:hover,.outline-btn:hover,.nav-item:hover,.chat-list-item:hover,.account-option:hover,.settings-row:hover{background:rgba(255,255,255,.075);border-color:rgba(211,183,255,.28)}
+.icon-btn:active,.outline-btn:active,.primary-btn:active,.nav-item:active,.pass-action:active,.like-action:active,.chat-list-item:active,.mobile-nav button:active{transform:scale(.965)}
+.primary-btn,.like-action,.send-btn{box-shadow:0 5px 22px rgba(151,102,230,.16)}
+.primary-btn:hover,.like-action:hover,.send-btn:hover{filter:brightness(1.12);box-shadow:0 8px 28px rgba(151,102,230,.27);transform:translateY(-1px)}
+.profile-card,.person-tile,.settings-card,.filter-panel,.event-row,.plus-card,.chat-window,.chat-list{
+  border:1px solid var(--glass-line);box-shadow:0 14px 40px rgba(0,0,0,.15)
+}
+.profile-card:hover,.person-tile:hover,.event-row:hover{border-color:rgba(207,174,255,.28);box-shadow:0 18px 48px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.05)}
+.settings-backdrop{background:rgba(5,3,10,.48);backdrop-filter:blur(16px) saturate(130%);-webkit-backdrop-filter:blur(16px) saturate(130%);animation:glass-backdrop-in .25s ease both}
+@keyframes glass-backdrop-in{from{opacity:0;backdrop-filter:blur(0)}to{opacity:1}}
+.account-panel,.report-dialog{background:linear-gradient(145deg,rgba(42,32,58,.92),rgba(20,15,31,.94));backdrop-filter:blur(34px) saturate(170%);-webkit-backdrop-filter:blur(34px) saturate(170%);border:1px solid rgba(255,255,255,.14);box-shadow:0 25px 90px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.09)}
+.account-panel{animation:glass-panel-in .42s cubic-bezier(.18,.8,.25,1) both}
+.report-dialog{animation:glass-modal-in .34s cubic-bezier(.18,.8,.25,1) both}
+@keyframes glass-panel-in{from{opacity:0;transform:translateX(42px) scale(.985);filter:blur(8px)}to{opacity:1;transform:translateX(0) scale(1);filter:blur(0)}}
+@keyframes glass-modal-in{from{opacity:0;transform:translateY(18px) scale(.96);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+.account-summary,.settings-help-card,.coin-pack{background:rgba(255,255,255,.045);border-color:var(--glass-line);box-shadow:inset 0 1px rgba(255,255,255,.055)}
+.account-option{border-radius:11px;margin:2px 0}
+.mobile-nav button{transition:transform .22s ease,color .22s ease,background .22s ease}
+.mobile-nav button.active{background:rgba(168,121,255,.12);box-shadow:inset 0 1px rgba(255,255,255,.08)}
+.inbox-tools button:hover,.attach-file:hover,.quiet-action:hover,.coin-pack button:hover{background:rgba(168,121,255,.16);border-color:rgba(190,151,255,.45)}
+.bubble{animation:message-pop .25s cubic-bezier(.2,.75,.25,1) both}
+@keyframes message-pop{from{opacity:0;transform:translateY(7px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.toast{animation:toast-glass-in .28s cubic-bezier(.2,.75,.25,1) both}
+@keyframes toast-glass-in{from{opacity:0;transform:translateY(12px) scale(.97);backdrop-filter:blur(0)}to{opacity:1;transform:translateY(0) scale(1);backdrop-filter:blur(18px)}}
+@media(hover:none){.profile-card:hover,.person-tile:hover,.event-row:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
