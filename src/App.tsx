@@ -127,7 +127,7 @@ export function DemoApp() {
           <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setAccountOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setAccountOpen(true)}>T</button></div>
         </header>
 
-        <div className="content">
+        <div className="content tab-transition" key={tab}>
           {tab === 'discover' && <section className="discover-view">
             <div className="section-heading"><div><div className="eyebrow">CONEXIONES CON SENTIDO</div><h1>Hay personas por <em>descubrir.</em></h1><p>Conoce gente nueva, a tu ritmo y sin presiones.</p></div><button className="outline-btn" onClick={() => setShowFilters(!showFilters)}><SlidersHorizontal size={17}/> Filtros</button></div>
             {showFilters && <div className="filter-panel"><strong>Preferencias de descubrimiento</strong><div className="filter-chips"><button className="chip selected">Cerca de mí</button><button className="chip">Relación</button><button className="chip">Amistad</button><button className="chip">Conocer gente</button></div><small>Los filtros avanzados estarán disponibles cuando conectemos tu cuenta.</small></div>}
