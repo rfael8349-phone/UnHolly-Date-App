@@ -42,7 +42,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       const { data: existing } = await supabase.from('profiles').select('id').eq('id', session.user.id).maybeSingle()
       if (!existing) {
         const displayName = String(session.user.user_metadata?.display_name || session.user.email?.split('@')[0] || 'Nuevo usuario').slice(0, 40)
-        await supabase.from('profiles').insert({ id: session.user.id, display_name: displayName })
+        await supabase.from('profiles').insert({ id: session.user.id, display_name: displayName, birth_date: session.user.user_metadata?.birth_date || null })
       }
     }
     void ensureProfile()
