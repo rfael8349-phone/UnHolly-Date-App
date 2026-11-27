@@ -1,10 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 
-const url = import.meta.env.VITE_SUPABASE_URL
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Estas dos credenciales son públicas (publishable) y pueden estar en el
+// frontend. La protección real de los datos depende de las políticas RLS.
+// Nunca colocar aquí una secret key ni una service_role.
+const url = 'https://kskgcxmbnmitgcivippr.supabase.co'
+const publishableKey = 'sb_publishable_J8Je4jM_ZEkCM1QSfjrp8Q_z-jhmFI1'
 
-// El cliente solo se crea cuando existen las variables de entorno.
-// Nunca coloques una clave service_role en el frontend.
-export const supabase = url && anonKey ? createClient(url, anonKey) : null
-
-export const isSupabaseConfigured = Boolean(supabase)
+export const supabase = createClient(url, publishableKey)
+export const isSupabaseConfigured = true
