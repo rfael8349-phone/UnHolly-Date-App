@@ -8,12 +8,12 @@ import { isSupabaseConfigured, supabase } from './lib/supabase'
 import { AccountSettings } from './AccountSettings'
 
 type Tab = 'discover' | 'map' | 'likes' | 'chats' | 'profile'
-type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; photo: string }
+type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; lookingFor: string[]; photo: string }
 
 const people: Person[] = [
-  { id: 1, name: 'Lucía', age: 28, city: 'Málaga', distance: '2 km', bio: 'Me gustan los conciertos pequeños, los paseos junto al mar y descubrir cafeterías nuevas.', tags: ['Música', 'Playa', 'Café'], photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop' },
-  { id: 2, name: 'Clara', age: 31, city: 'Málaga', distance: '4 km', bio: 'Un buen plan empieza con una conversación y termina con una historia que contar.', tags: ['Viajes', 'Cine', 'Arte'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop' },
-  { id: 3, name: 'Nerea', age: 26, city: 'Torremolinos', distance: '7 km', bio: 'Naturaleza, animales y música en directo. Busco conocer gente sin prisas.', tags: ['Naturaleza', 'Música', 'Animales'], photo: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&auto=format&fit=crop' },
+  { id: 1, name: 'Lucía', age: 28, city: 'Málaga', distance: '2 km', bio: 'Me gustan los conciertos pequeños, los paseos junto al mar y descubrir cafeterías nuevas.', tags: ['Música', 'Playa', 'Café'], lookingFor: ['Citas románticas','Conocer gente y tener citas'], photo: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=900&auto=format&fit=crop' },
+  { id: 2, name: 'Clara', age: 31, city: 'Málaga', distance: '4 km', bio: 'Un buen plan empieza con una conversación y termina con una historia que contar.', tags: ['Viajes', 'Cine', 'Arte'], lookingFor: ['Una relación seria y estable','Encontrar mi media naranja'], photo: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=900&auto=format&fit=crop' },
+  { id: 3, name: 'Nerea', age: 26, city: 'Torremolinos', distance: '7 km', bio: 'Naturaleza, animales y música en directo. Busco conocer gente sin prisas.', tags: ['Naturaleza', 'Música', 'Animales'], lookingFor: ['Ver qué pasa, sin expectativas','Amistad y nuevos vínculos'], photo: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&auto=format&fit=crop' },
 ]
 
 const miniGameQuestions = [
@@ -191,7 +191,7 @@ export function DemoApp() {
                   <button className="photo-more" onClick={() => flash('Opciones de perfil de demostración')}><MoreHorizontal size={21}/></button>
                   <div className="photo-info"><div className="profile-name">{current.name}, {current.age}</div><div className="profile-location"><MapPin size={14}/>{current.city} · {current.distance}</div></div>
                 </div>
-                <div className="profile-details"><p>{current.bio}</p><div className="tag-row">{current.tags.map(t => <span className="tag" key={t}>{t}</span>)}</div><div className="card-actions"><button className="pass-action" onClick={passPerson} aria-label="Pasar"><X size={23}/></button><button className="like-action" onClick={likePerson} aria-label="Me gusta"><Heart size={24} fill="currentColor"/></button></div></div>
+                <div className="profile-details"><p>{current.bio}</p><div className="tag-row">{current.tags.map(t => <span className="tag" key={t}>{t}</span>)}</div><div className="looking-for-row"><small>QUÉ BUSCA</small><div>{current.lookingFor.map(t=><span className="looking-for-tag" key={t}>{t}</span>)}</div></div><div className="card-actions"><button className="pass-action" onClick={passPerson} aria-label="Pasar"><X size={23}/></button><button className="like-action" onClick={likePerson} aria-label="Me gusta"><Heart size={24} fill="currentColor"/></button></div></div>
               </div>
               <aside className="discover-aside"><div className="aside-title"><Sparkles size={17}/> Una conexión empieza aquí</div><h3>No se trata de deslizar sin parar.</h3><p>Queremos que descubras personas con intereses y formas de ver la vida que conecten contigo.</p><div className="aside-stat"><div><strong>{liked.length}</strong><span>Likes enviados</span></div><div><strong>{remaining.length}</strong><span>Perfiles por ver</span></div></div><div className="privacy-note"><LockKeyhole size={17}/><span>Tu ubicación exacta nunca se muestra a otros perfiles.</span></div></aside>
             </div>
