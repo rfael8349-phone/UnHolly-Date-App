@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 import {
   Heart, Compass, MapPin, MessageCircle, UserRound, ShieldCheck,
   Sparkles, SlidersHorizontal, Bell, Plus, Send, ChevronRight,
-  Check, Crown, X, Menu, MoreHorizontal, LockKeyhole
+  Check, Crown, X, Menu, MoreHorizontal, LockKeyhole, Settings, LogOut, CircleHelp
 } from 'lucide-react'
-import { isSupabaseConfigured } from './lib/supabase'
+import { isSupabaseConfigured, supabase } from './lib/supabase'
 
 type Tab = 'discover' | 'map' | 'likes' | 'chats' | 'profile'
 type Person = { id: number; name: string; age: number; city: string; distance: string; bio: string; tags: string[]; photo: string }
@@ -32,6 +32,21 @@ export function DemoApp() {
   const [showFilters, setShowFilters] = useState(false)
   const [profileName, setProfileName] = useState('Tu perfil')
   const [mobileMenu, setMobileMenu] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [accountEmail, setAccountEmail] = useState('')
+
+  useEffect(() => {
+    let alive = true
+    if (supabase) supabase.auth.getUser().then(({ data }) => { if (alive) setAccountEmail(data.user?.email || '') })
+    return () => { alive = false }
+  }, [])
+
+  async function signOut() {
+    if (!supabase) { flash('La sesión de demostración no está conectada.'); return }
+    const { error } = await supabase.auth.signOut()
+    if (error) flash('No se pudo cerrar sesión: ' + error.message)
+    else { setSettingsOpen(false); flash('Has cerrado sesión correctamente.') }
+  }
 
   const current = people[index % people.length]
   const active = chats.find(c => c.id === activeChat)
@@ -81,7 +96,7 @@ export function DemoApp() {
         <header className="topbar">
           <button className="icon-btn mobile-menu-btn" onClick={() => setMobileMenu(!mobileMenu)}><Menu size={21}/></button>
           <div className="breadcrumb">UnHolly <span>/</span> <strong>{nav.find(n => n.id === tab)?.label}</strong></div>
-          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><div className="avatar-placeholder small">T</div></div>
+          <div className="top-actions"><span className="location-pill"><MapPin size={14}/> Málaga</span><button className="icon-btn" aria-label="Notificaciones" onClick={() => flash('No tienes notificaciones nuevas')}><Bell size={19}/></button><button className="icon-btn" aria-label="Configuración" onClick={() => setSettingsOpen(true)}><Settings size={18}/></button><button className="avatar-placeholder small account-avatar" aria-label="Abrir cuenta" onClick={() => setSettingsOpen(true)}>T</button></div>
         </header>
 
         <div className="content">
@@ -111,6 +126,18 @@ export function DemoApp() {
         </div>
         <footer className="app-footer"><span>UnHolly © 2026</span><span>{isSupabaseConfigured ? 'Servicios conectados' : 'Entorno de demostración · Backend pendiente'}</span><span>Hecho para conectar 💜</span></footer>
       </main>
+      {settingsOpen && <div className="settings-backdrop" onClick={() => setSettingsOpen(false)}>
+        <section className="account-panel" role="dialog" aria-modal="true" aria-label="Opciones de cuenta" onClick={e => e.stopPropagation()}>
+          <div className="account-panel-head"><div><span className="eyebrow">TU ESPACIO</span><h2>Cuenta y opciones</h2></div><button className="icon-btn" aria-label="Cerrar" onClick={() => setSettingsOpen(false)}><X size={18}/></button></div>
+          <div className="account-summary"><div className="avatar-placeholder account-large">T</div><div><strong>{profileName}</strong><small>{accountEmail || 'Cuenta iniciada'}</small></div></div>
+          <button className="account-option" onClick={() => { setSettingsOpen(false); setTab('profile') }}><UserRound size={18}/><span><strong>Mi perfil</strong><small>Ver y editar tu información</small></span><ChevronRight size={17}/></button>
+          <button className="account-option" onClick={() => flash('Las preferencias de privacidad estarán disponibles en la próxima actualización.')}><LockKeyhole size={18}/><span><strong>Privacidad y seguridad</strong><small>Controla quién puede encontrarte</small></span><ChevronRight size={17}/></button>
+          <button className="account-option" onClick={() => flash('Las notificaciones se configurarán próximamente.')}><Bell size={18}/><span><strong>Notificaciones</strong><small>Preferencias de avisos</small></span><ChevronRight size={17}/></button>
+          <button className="account-option" onClick={() => flash('Centro de ayuda próximamente.')}><CircleHelp size={18}/><span><strong>Ayuda y soporte</strong><small>Preguntas y asistencia</small></span><ChevronRight size={17}/></button>
+          <button className="account-logout" onClick={signOut}><LogOut size={18}/> Cerrar sesión</button>
+          <p className="account-version">UnHolly · Versión inicial</p>
+        </section>
+      </div>}
       {notice && <div className="toast"><Check size={17}/>{notice}</div>}
       <nav className="mobile-nav">{nav.map(item => <button key={item.id} className={tab === item.id ? 'active' : ''} onClick={() => { setTab(item.id); setActiveChat(null) }}><item.icon size={20}/><span>{item.label}</span></button>)}</nav>
     </div>
