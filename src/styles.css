@@ -173,3 +173,16 @@
 .looking-for-row>small{font-size:8px;font-weight:800;letter-spacing:.13em;color:#bda2dd}
 .looking-for-row>div{display:flex;flex-wrap:wrap;gap:6px}
 .looking-for-tag{display:inline-flex;padding:6px 9px;border:1px solid #b78aff38;border-radius:20px;background:#a879ff12;color:#e5d4fb;font-size:9px}
+
+
+.public-preferences-section{margin:28px 0 12px}
+.public-preferences-section h2{margin:7px 0 5px;font-size:20px;color:#f4eaff}
+.public-preferences-section>p{margin:0 0 14px;color:#aa9ab8;font-size:11px;line-height:1.6}
+.public-preferences-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.public-preference-card{display:grid;gap:12px;padding:15px;border:1px solid var(--glass-line);border-radius:15px;background:linear-gradient(145deg,rgba(168,121,255,.10),rgba(255,255,255,.025));backdrop-filter:blur(16px)}
+.public-preference-card>strong{font-size:14px;color:#fff}
+.public-preference-card small{display:block;margin-bottom:7px;color:#bba2dc;font-size:8px;font-weight:800;letter-spacing:.12em}
+.public-tag-list{display:flex;flex-wrap:wrap;gap:6px}
+.public-tag-list span{padding:6px 8px;border:1px solid #b78aff30;border-radius:20px;background:#a879ff12;color:#e5d7f6;font-size:9px}
+.public-preference-card p{margin:0;color:#b6a8c4;font-size:10px}
+.public-profile-empty{padding:17px;border:1px dashed #b78aff45;border-radius:13px;color:#b6a8c4;font-size:11px;line-height:1.6}
