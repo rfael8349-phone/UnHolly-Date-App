@@ -24,6 +24,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [gender, setGender] = useState('')
   const [lookingFor, setLookingFor] = useState('Conocer gente y ver qué pasa')
   const [relationship, setRelationship] = useState('Soltero/a')
+  const [icebreaker, setIcebreaker] = useState('Si hay buena conversación, el plan se improvisa.')
   const [accepted, setAccepted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
@@ -80,7 +81,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
       if (mode === 'signup') {
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: { data: { display_name: name.trim(), birth_date: birthDate, city: city.trim(), bio: bio.trim(), gender, looking_for: lookingFor, relationship_status: relationship } },
+          options: { data: { display_name: name.trim(), birth_date: birthDate, city: city.trim(), bio: bio.trim(), gender, looking_for: lookingFor, relationship_status: relationship, icebreaker } },
         })
         if (error) throw error
         if (!data.session) setNotice('Cuenta creada. Revisa tu correo para confirmar la dirección y después inicia sesión. Tus fotos y vídeos aún están en vista previa y podrás publicarlos al activar el almacenamiento multimedia.')
@@ -124,6 +125,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
             <label>Género<div className="auth-input"><UserRound size={17}/><select value={gender} onChange={e => setGender(e.target.value)}><option value="">Prefiero indicarlo luego</option><option>Mujer</option><option>Hombre</option><option>No binario</option><option>Otro</option><option>Prefiero no decirlo</option></select></div></label>
           </div>
           <label>¿Qué te apetece encontrar?<div className="auth-input"><Heart size={17}/><select value={lookingFor} onChange={e => setLookingFor(e.target.value)}><option>Conocer gente y ver qué pasa</option><option>Una relación seria</option><option>Citas románticas</option><option>Algo casual, sin compromiso</option><option>Amistad y nuevos planes</option><option>Salir de fiesta y divertirme</option><option>Encontrar mi media naranja</option><option>Construir una familia</option></select></div></label>
+          <label>Frase para romper el hielo<div className="auth-input"><Sparkles size={17}/><select value={icebreaker} onChange={e => setIcebreaker(e.target.value)}><option>Si hay buena conversación, el plan se improvisa.</option><option>¿Café, concierto o una aventura espontánea?</option><option>Vengo por las risas y me quedo por la química.</option><option>Mi talento: elegir canciones y malos chistes.</option><option>Un piropo ingenioso siempre suma, si hay respeto.</option><option>Mejor en persona: ¿cuál sería nuestro primer plan?</option></select></div></label>
           <div className="auth-form-grid">
             <label>Situación sentimental<div className="auth-input"><Heart size={17}/><select value={relationship} onChange={e => setRelationship(e.target.value)}><option>Soltero/a</option><option>Divorciado/a</option><option>Separado/a</option><option>Viudo/a</option><option>Prefiero no decirlo</option></select></div></label>
             <label>Sobre mí<div className="auth-input"><Sparkles size={17}/><input value={bio} onChange={e => setBio(e.target.value)} placeholder="Una frase que te describa" maxLength={240}/></div></label>
