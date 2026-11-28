@@ -1,6 +1,6 @@
 import { FormEvent, ReactNode, useEffect, useState } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { Heart, Mail, LockKeyhole, UserRound, CalendarDays, ArrowRight, LoaderCircle, MapPin, Camera, Video, Sparkles } from 'lucide-react'
+import { Heart, Mail, LockKeyhole, UserRound, CalendarDays, ArrowRight, LoaderCircle, MapPin, Camera, Video, Sparkles, ChevronLeft, Apple, Facebook } from 'lucide-react'
 import { isSupabaseConfigured, supabase } from './lib/supabase'
 
 function ageFromDate(value: string) {
@@ -14,8 +14,10 @@ function ageFromDate(value: string) {
 export function AuthGate({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [screen, setScreen] = useState<'welcome' | 'access' | 'profile' | 'media'>('welcome')
   const [mode, setMode] = useState<'login' | 'signup'>('signup')
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [birthDate, setBirthDate] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -23,8 +25,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
   const [bio, setBio] = useState('')
   const [gender, setGender] = useState('')
   const [lookingFor, setLookingFor] = useState('Conocer gente y ver qué pasa')
-  const [relationship, setRelationship] = useState('Soltero/a')
-  const [icebreaker, setIcebreaker] = useState('Si hay buena conversación, el plan se improvisa.')
   const [accepted, setAccepted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
@@ -47,8 +47,8 @@ export function AuthGate({ children }: { children: ReactNode }) {
       const metadata = session.user.user_metadata || {}
       const { data: existing } = await supabase.from('profiles').select('id').eq('id', session.user.id).maybeSingle()
       if (!existing) {
-        const displayName = String(metadata.display_name || session.user.email?.split('@')[0] || 'Nuevo usuario').slice(0, 40)
-        await supabase.from('profiles').insert({ id: session.user.id, display_name: displayName, birth_date: metadata.birth_date || null, city: metadata.city || null, bio: metadata.bio || null })
+        const fullName = [metadata.first_name, metadata.last_name].filter(Boolean).join(' ') || metadata.display_name || session.user.email?.split('@')[0] || 'Nuevo usuario'
+        await supabase.from('profiles').insert({ id: session.user.id, display_name: String(fullName).slice(0, 40), birth_date: metadata.birth_date || null, city: metadata.city || null, bio: metadata.bio || null })
       }
     }
     void ensureProfile()
@@ -66,26 +66,42 @@ export function AuthGate({ children }: { children: ReactNode }) {
     }
   }
 
+  async function socialLogin(provider: 'google' | 'apple' | 'facebook') {
+    if (!supabase) { setNotice('Configura Supabase para activar el acceso con proveedores externos.'); return }
+    setBusy(true); setNotice('')
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({ provider, options: { redirectTo: window.location.origin } })
+      if (error) throw error
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : 'No se pudo iniciar el acceso externo.')
+      setBusy(false)
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault()
     if (!supabase) return
     setNotice('')
     if (mode === 'signup') {
-      if (name.trim().length < 2) { setNotice('Escribe un nombre de al menos 2 caracteres.'); return }
-      if (!birthDate || ageFromDate(birthDate) < 18) { setNotice('UnHolly es exclusivamente para mayores de 18 años.'); return }
-      if (!accepted) { setNotice('Debes aceptar las condiciones y la política de privacidad.'); return }
+      if (screen === 'profile') {
+        if (firstName.trim().length < 2 || lastName.trim().length < 2) { setNotice('Indica tu nombre y apellido.'); return }
+        if (!birthDate || ageFromDate(birthDate) < 18) { setNotice('UnHolly es exclusivamente para mayores de 18 años.'); return }
+        if (!accepted) { setNotice('Debes confirmar que eres mayor de 18 años y aceptar las condiciones.'); return }
+        setScreen('media'); return
+      }
       if (password.length < 8) { setNotice('La contraseña debe tener al menos 8 caracteres.'); return }
     }
     setBusy(true)
     try {
       if (mode === 'signup') {
+        const fullName = [firstName.trim(), lastName.trim()].join(' ')
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(), password,
-          options: { data: { display_name: name.trim(), birth_date: birthDate, city: city.trim(), bio: bio.trim(), gender, looking_for: lookingFor, relationship_status: relationship, icebreaker } },
+          options: { data: { first_name: firstName.trim(), last_name: lastName.trim(), display_name: fullName, birth_date: birthDate, city: city.trim(), bio: bio.trim(), gender, looking_for: lookingFor } },
         })
         if (error) throw error
-        if (!data.session) setNotice('Cuenta creada. Revisa tu correo para confirmar la dirección y después inicia sesión. Tus fotos y vídeos aún están en vista previa y podrás publicarlos al activar el almacenamiento multimedia.')
-        else setNotice('¡Cuenta creada! Tu perfil básico ya está preparado. Completa tus fotos y vídeos desde tu perfil cuando el almacenamiento multimedia esté conectado.')
+        if (!data.session) setNotice('Cuenta creada. Confirma tu correo para entrar. Las fotos y vídeos quedan seleccionados en esta sesión, pero todavía no se publican: falta conectar el almacenamiento seguro.')
+        else setNotice('¡Cuenta creada! Tu perfil básico ya está preparado. Para publicar tus fotos y vídeos falta activar el almacenamiento seguro.')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
         if (error) throw error
@@ -99,54 +115,54 @@ export function AuthGate({ children }: { children: ReactNode }) {
   if (loading) return <div className="auth-loading"><LoaderCircle className="spin" size={28}/><span>Preparando UnHolly…</span></div>
   if (session) return <>{children}</>
 
-  return <main className="auth-page auth-page-v2">
-    <div className="auth-showcase" aria-label="Ambiente social y encuentros">
-      <div className="auth-showcase-image auth-image-one"/>
-      <div className="auth-showcase-image auth-image-two"/>
-      <div className="auth-showcase-image auth-image-three"/>
-      <div className="auth-showcase-shade"/>
-      <div className="auth-showcase-copy"><span className="auth-live"><i/> CONEXIONES SIN GUION</span><h2>Menos scroll.<br/><em>Más historias.</em></h2><p>Conoce gente, sal de la rutina y deja que pase algo bonito… o divertido.</p><div className="auth-social-proof"><span>💜</span><span>🥂</span><span>✨</span><small>Tu próxima aventura empieza con un hola.</small></div></div>
-    </div>
-    <section className="auth-card auth-card-v2">
-      <a className="auth-brand" href="#"><span><Heart size={20} fill="currentColor"/></span>unholly<span className="brand-dot">.</span></a>
-      <div className="auth-eyebrow">CONOCE · CONECTA · ENCUÉNTRATE</div>
-      <h1>{mode === 'signup' ? 'Tu próxima historia' : 'Qué bueno verte'}<em>{mode === 'signup' ? ' empieza aquí.' : ' de nuevo.'}</em></h1>
-      <p className="auth-intro">{mode === 'signup' ? 'Gente real, planes espontáneos y conexiones a tu manera.' : 'Entra en tu espacio y continúa donde lo dejaste.'}</p>
-      <div className="auth-switch"><button type="button" className={mode === 'signup' ? 'selected' : ''} onClick={() => { setMode('signup'); setNotice('') }}>Crear cuenta</button><button type="button" className={mode === 'login' ? 'selected' : ''} onClick={() => { setMode('login'); setNotice('') }}>Iniciar sesión</button></div>
-      <form className="auth-form auth-form-v2" onSubmit={submit}>
-        {mode === 'signup' && <>
-          <div className="auth-form-section"><Sparkles size={15}/> TU PERFIL</div>
-          <div className="auth-form-grid">
-            <label>Nombre visible<div className="auth-input"><UserRound size={17}/><input autoComplete="nickname" value={name} onChange={e => setName(e.target.value)} placeholder="¿Cómo te llamamos?" maxLength={40} required/></div></label>
-            <label>Fecha de nacimiento<div className="auth-input"><CalendarDays size={17}/><input type="date" value={birthDate} onChange={e => setBirthDate(e.target.value)} max={new Date().toISOString().slice(0,10)} required/></div></label>
-          </div>
-          <div className="auth-form-grid">
-            <label>Ciudad<div className="auth-input"><MapPin size={17}/><input value={city} onChange={e => setCity(e.target.value)} placeholder="Tu ciudad" maxLength={60}/></div></label>
-            <label>Género<div className="auth-input"><UserRound size={17}/><select value={gender} onChange={e => setGender(e.target.value)}><option value="">Prefiero indicarlo luego</option><option>Mujer</option><option>Hombre</option><option>No binario</option><option>Otro</option><option>Prefiero no decirlo</option></select></div></label>
-          </div>
-          <label>¿Qué te apetece encontrar?<div className="auth-input"><Heart size={17}/><select value={lookingFor} onChange={e => setLookingFor(e.target.value)}><option>Conocer gente y ver qué pasa</option><option>Una relación seria</option><option>Citas románticas</option><option>Algo casual, sin compromiso</option><option>Amistad y nuevos planes</option><option>Salir de fiesta y divertirme</option><option>Encontrar mi media naranja</option><option>Construir una familia</option></select></div></label>
-          <label>Frase para romper el hielo<div className="auth-input"><Sparkles size={17}/><select value={icebreaker} onChange={e => setIcebreaker(e.target.value)}><option>Si hay buena conversación, el plan se improvisa.</option><option>¿Café, concierto o una aventura espontánea?</option><option>Vengo por las risas y me quedo por la química.</option><option>Mi talento: elegir canciones y malos chistes.</option><option>Un piropo ingenioso siempre suma, si hay respeto.</option><option>Mejor en persona: ¿cuál sería nuestro primer plan?</option></select></div></label>
-          <div className="auth-form-grid">
-            <label>Situación sentimental<div className="auth-input"><Heart size={17}/><select value={relationship} onChange={e => setRelationship(e.target.value)}><option>Soltero/a</option><option>Divorciado/a</option><option>Separado/a</option><option>Viudo/a</option><option>Prefiero no decirlo</option></select></div></label>
-            <label>Sobre mí<div className="auth-input"><Sparkles size={17}/><input value={bio} onChange={e => setBio(e.target.value)} placeholder="Una frase que te describa" maxLength={240}/></div></label>
-          </div>
-          <div className="auth-form-section"><Camera size={15}/> FOTOS Y VÍDEOS DE PRESENTACIÓN</div>
-          <div className="auth-media-pickers">
-            <label className="auth-media-picker"><Camera size={18}/><strong>Añadir fotos</strong><small>Hasta 6 imágenes</small><input type="file" accept="image/*" multiple onChange={e => selectMedia(e.target.files,'photo')}/></label>
-            <label className="auth-media-picker"><Video size={18}/><strong>Vídeos cortos</strong><small>Hasta 3 clips</small><input type="file" accept="video/*" multiple onChange={e => selectMedia(e.target.files,'video')}/></label>
-          </div>
-          {(photoPreviews.length > 0 || videoPreviews.length > 0) && <div className="auth-media-preview">{photoPreviews.map((src,i)=><img key={'p'+i} src={src} alt={'Vista previa '+(i+1)}/>)}{videoPreviews.map((src,i)=><video key={'v'+i} src={src} controls muted/> )}</div>}
-          {(photos.length > 0 || videos.length > 0) && <small className="auth-media-note">Vista previa local: los archivos todavía no se suben a tu perfil. Se activará al conectar el almacenamiento seguro.</small>}
-        </>}
-        <div className="auth-form-section"><Mail size={15}/> ACCESO A TU CUENTA</div>
-        <label>Correo electrónico<div className="auth-input"><Mail size={17}/><input type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="tu@email.com" required/></div></label>
-        <label>Contraseña<div className="auth-input"><LockKeyhole size={17}/><input type="password" autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 8 caracteres" minLength={8} required/></div></label>
-        {mode === 'signup' && <label className="auth-consent"><input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)}/><span>Confirmo que tengo 18 años o más y acepto las condiciones y la política de privacidad.</span></label>}
-        {notice && <div className="auth-notice" role="status">{notice}</div>}
-        <button className="auth-submit" disabled={busy} type="submit">{busy ? <LoaderCircle className="spin" size={18}/> : <>{mode === 'signup' ? 'Crear mi cuenta' : 'Entrar'} <ArrowRight size={17}/></>}</button>
-      </form>
-      <div className="auth-privacy"><LockKeyhole size={14}/> Tú decides qué información y contenido muestras.</div>
-      <div className="auth-footer">UnHolly es exclusivamente para mayores de 18 años.</div>
-    </section>
+  return <main className="uh-entry">
+    {screen === 'welcome' && <section className="uh-welcome">
+      <div className="uh-welcome-photo"/>
+      <div className="uh-welcome-overlay"/>
+      <div className="uh-welcome-top"><a className="uh-logo"><Heart fill="currentColor"/> unholly<span>.</span></a><span className="uh-adult">18+ · SOLO ADULTOS</span></div>
+      <div className="uh-welcome-bottom"><div className="uh-kicker"><i/> CONEXIONES REALES, MOMENTOS INESPERADOS</div><h1>Que empiece<br/>la <em>química.</em></h1><p>Personas que te despiertan curiosidad. Planes que no estaban en tus planes. Historias que empiezan aquí.</p><button className="uh-primary" onClick={() => setScreen('access')}>Entrar en UnHolly <ArrowRight size={18}/></button><div className="uh-footnote">Conoce · Coquetea · Sal · Enamórate · Sé tú</div></div>
+      <div className="uh-image-credit">Imagen ilustrativa · Unsplash</div>
+    </section>}
+
+    {screen === 'access' && <section className="uh-access">
+      <button className="uh-back" onClick={() => {setScreen('welcome');setNotice('')}}><ChevronLeft/> Volver</button>
+      <div className="uh-access-art"><div className="uh-access-image"/><div className="uh-access-art-copy"><span>UNHOLLY / 2027</span><strong>La vida pasa<br/>cuando conectas.</strong></div></div>
+      <div className="uh-access-panel"><a className="uh-logo"><Heart fill="currentColor"/> unholly<span>.</span></a><div className="uh-kicker">TU SIGUIENTE CAPÍTULO</div><h2>{mode === 'login' ? 'Qué bueno tenerte de vuelta.' : '¿Y si hoy conoces a alguien especial?'}</h2><p>Entra a tu cuenta o crea tu espacio. Tú decides qué historia quieres vivir.</p>
+        <div className="uh-social-buttons">
+          <button onClick={() => socialLogin('google')} disabled={busy}><b className="uh-google-g">G</b> Continuar con Google</button>
+          <button onClick={() => socialLogin('apple')} disabled={busy}><Apple/> Continuar con Apple</button>
+          <button onClick={() => socialLogin('facebook')} disabled={busy}><Facebook/> Continuar con Facebook</button>
+        </div>
+        <div className="uh-or"><span/> O CON TU CORREO <span/></div>
+        <button className="uh-email-choice" onClick={() => {setMode('signup');setScreen('profile');setNotice('')}}><Mail/> Crear perfil con correo <ArrowRight/></button>
+        <button className="uh-login-choice" onClick={() => {setMode('login');setNotice('')}}>¿Ya tienes cuenta? <strong>Iniciar sesión</strong></button>
+        {mode === 'login' && <form className="uh-login-form" onSubmit={submit}><label>Correo electrónico<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} required/></label><label>Contraseña<input type="password" autoComplete="current-password" value={password} onChange={e=>setPassword(e.target.value)} required/></label><button className="uh-primary" disabled={busy}>{busy?<LoaderCircle className="spin"/>:'Iniciar sesión'} <ArrowRight/></button></form>}
+        {notice && <div className="uh-notice" role="status">{notice}</div>}
+        <small className="uh-legal">Al continuar aceptas nuestras condiciones y política de privacidad. UnHolly es exclusivamente para mayores de 18 años.</small>
+      </div>
+    </section>}
+
+    {(screen === 'profile' || screen === 'media') && <section className="uh-builder">
+      <header className="uh-builder-header"><button className="uh-back" onClick={() => setScreen(screen === 'media' ? 'profile' : 'access')}><ChevronLeft/> Atrás</button><a className="uh-logo"><Heart fill="currentColor"/> unholly<span>.</span></a><span className="uh-step-count">{screen === 'profile' ? '01' : '02'} / 02</span></header>
+      <div className="uh-progress"><i style={{width:screen==='profile'?'50%':'100%'}}/></div>
+      {screen === 'profile' ? <div className="uh-builder-content"><div className="uh-kicker">VAMOS A CONOCERNOS</div><h1>Primero, <em>tú.</em></h1><p className="uh-builder-intro">Cuéntanos lo esencial. Tu perfil debe sentirse como tú, no como un formulario.</p>
+        <form className="uh-profile-form" onSubmit={submit}>
+          <div className="uh-field-pair"><label>Nombre<input value={firstName} onChange={e=>setFirstName(e.target.value)} placeholder="Tu nombre" autoComplete="given-name" required/></label><label>Apellido<input value={lastName} onChange={e=>setLastName(e.target.value)} placeholder="Tu apellido" autoComplete="family-name" required/></label></div>
+          <label>Fecha de nacimiento<div className="uh-input-icon"><CalendarDays/><input type="date" value={birthDate} onChange={e=>setBirthDate(e.target.value)} max={new Date().toISOString().slice(0,10)} required/></div><small>Tu edad se mostrará en el perfil; tu fecha completa no será pública.</small></label>
+          <div className="uh-field-pair"><label>Ciudad<div className="uh-input-icon"><MapPin/><input value={city} onChange={e=>setCity(e.target.value)} placeholder="Tu ciudad"/></div></label><label>¿Cómo te identificas?<select value={gender} onChange={e=>setGender(e.target.value)}><option value="">Prefiero no decirlo</option><option>Mujer</option><option>Hombre</option><option>No binario</option><option>Otra identidad</option></select></label></div>
+          <label>¿Qué te gustaría encontrar?<select value={lookingFor} onChange={e=>setLookingFor(e.target.value)}><option>Conocer gente y ver qué pasa</option><option>Una relación seria</option><option>Citas románticas</option><option>Algo casual, sin compromiso</option><option>Amistad y nuevos planes</option><option>Salir de fiesta y divertirme</option><option>Encontrar mi media naranja</option><option>Construir una familia</option></select></label>
+          <label>Tu presentación<textarea value={bio} onChange={e=>setBio(e.target.value)} placeholder="¿Qué te hace ser tú? Una frase, una pasión, una pequeña locura…" maxLength={300}/></label>
+          <label className="uh-consent"><input type="checkbox" checked={accepted} onChange={e=>setAccepted(e.target.checked)}/> Tengo 18 años o más y acepto las condiciones y la política de privacidad.</label>
+          {notice && <div className="uh-notice">{notice}</div>}
+          <button className="uh-primary" type="submit">Continuar a mis fotos <ArrowRight/></button>
+        </form>
+      </div> : <div className="uh-builder-content uh-media-step"><div className="uh-kicker">TU LADO MÁS AUTÉNTICO</div><h1>Que te <em>vean.</em></h1><p className="uh-builder-intro">Las fotos cuentan tu historia. Añade imágenes y pequeños vídeos para que puedan conocerte mejor.</p>
+        <div className="uh-upload-grid"><label className="uh-upload-card uh-main-upload"><Camera/><strong>Tu foto principal</strong><small>La primera impresión empieza aquí</small><input type="file" accept="image/*" onChange={e=>selectMedia(e.target.files,'photo')}/></label><label className="uh-upload-card"><Sparkles/><strong>Más fotos</strong><small>Hasta 6 imágenes</small><input type="file" accept="image/*" multiple onChange={e=>selectMedia(e.target.files,'photo')}/></label><label className="uh-upload-card"><Video/><strong>Vídeos cortos</strong><small>Hasta 3 clips</small><input type="file" accept="video/*" multiple onChange={e=>selectMedia(e.target.files,'video')}/></label></div>
+        {(photoPreviews.length>0 || videoPreviews.length>0) && <div className="uh-media-preview">{photoPreviews.map((src,i)=><img key={'p'+i} src={src} alt={'Foto seleccionada '+(i+1)}/>)}{videoPreviews.map((src,i)=><video key={'v'+i} src={src} controls muted/>)}</div>}
+        {notice && <div className="uh-notice">{notice}</div>}
+        <button className="uh-primary" disabled={busy} onClick={async()=>{if(!supabase)return;setBusy(true);setNotice('');try{const fullName=[firstName.trim(),lastName.trim()].join(' ');const {data,error}=await supabase.auth.signUp({email:email.trim(),password,options:{data:{first_name:firstName.trim(),last_name:lastName.trim(),display_name:fullName,birth_date:birthDate,city:city.trim(),bio:bio.trim(),gender,looking_for:lookingFor}}});if(error)throw error;if(!data.session)setNotice('Cuenta creada. Confirma tu correo para continuar. Las imágenes y vídeos seleccionados son una vista previa: falta conectar el almacenamiento seguro.');else setNotice('¡Bienvenido/a a UnHolly! Tu cuenta está creada. Tus archivos aún no se publican hasta activar el almacenamiento seguro.')}catch(error){setNotice(error instanceof Error?error.message:'No se pudo crear la cuenta.')}finally{setBusy(false)}}}>{busy?<LoaderCircle className="spin"/>:'Crear mi cuenta'} <ArrowRight/></button>
+        <small className="uh-media-privacy">Tus archivos deben ser tuyos y mostrarte a ti. Podrás decidir qué contenido es visible. No publicamos nada sin tu acción.</small>
+      </div>}
+    </section>}
   </main>
 }
